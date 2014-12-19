@@ -1,0 +1,11 @@
+{
+    "name": "samwilson/swfw",
+    "autoload": {
+        "psr-0": {
+            "SWFW": "application"
+        }
+    },
+    "require": {
+        "twig/twig": "1.*"
+    }
+}
