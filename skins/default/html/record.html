@@ -1,0 +1,67 @@
+{%extends "page.html"%}
+
+{% block content %}
+
+{% include "subnav.html" with {'active': 'record'} %}
+
+<form method="post" action="{{baseurl}}/record/{{table.name}}/{{record.id}}">
+    {% for column in columns %}
+
+    <div class="row">
+        <div class="small-2 columns">
+            <label for="{{column.name}}" class="right inline">{{column.title}}</label>
+        </div>
+        <div class="small-7 columns">
+            <!--{% include ["field_#{column.type}.html", "field.html"] %} -->
+
+            {% if column.isForeignKey %}
+            <select name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
+                    >
+                {% for row in column.getReferencedTable.rows %}
+                <option value="{{ attribute(row, column.getReferencedTable.pkcolumn.name) }}">
+                    {{ attribute(row, column.getReferencedTable.titlecolumn.name) }}
+                </option>
+                {% endfor %}
+            </select>
+
+            {% else %}
+            <input type="text" name="{{column.name}}" id="{{column.name}}" value="{{ attribute(record, column.name)}}" 
+                   aria-describedby="{{column.name}}-help"
+                   {% if column.name == table.pkcolumn.name %}
+                   readonly
+                   {% endif %}
+                   />
+
+            {% endif %}
+        </div>
+        <div class="small-3 columns">
+            <label id="{{column.name}}-help" class="inline" for="{{column.name}}">
+                <em>{{column.comment}}</em>
+                {{ column.referencedtable.title }}
+            </label>
+        </div>
+    </div>
+
+    {% endfor %}
+
+    <div class="row">
+        <div class="small-2 columns">
+        </div>
+        <div class="small-10 columns">
+            <input type="submit" value="Save" class="button" />
+        </div>
+    </div>
+
+</form>
+
+{% for table in table.referencingTables %}
+<div class="referencing-table">
+<h2>{{ table.table.title }}</h2>
+
+<!--{ include "table.html" with {'table': table} %}-->
+
+
+</div><!-- .referencing-table -->
+{% endfor %}
+
+{% endblock %}

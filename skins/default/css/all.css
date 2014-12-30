@@ -1,0 +1,7 @@
+.row.full-width { width:100%; max-width:100% }
+#content { margin:1em }
+
+pre.queries { margin:0 1em }
+
+table td.type-int { text-align:right }
+is-foreign-key { text-align:left }

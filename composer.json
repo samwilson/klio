@@ -1,8 +1,8 @@
 {
-    "name": "samwilson/swfw",
+    "name": "samwilson/klio",
     "autoload": {
         "psr-0": {
-            "SWFW": "application"
+            "Klio": "application"
         }
     },
     "require": {

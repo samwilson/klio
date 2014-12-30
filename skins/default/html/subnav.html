@@ -1,0 +1,22 @@
+<dl class="sub-nav">
+    <!--dt>This table:</dt-->
+
+    <dd class="{%if active=='table'%}active{%endif%}"><a href="{{baseurl}}/table/{{table.name}}">Search</a></dd>
+
+    <dd class="{%if active=='record'%}active{%endif%}">
+        {% if record.id %}
+        <a href="{{baseurl}}/record/{{table.name}}/{{record.id}}">Edit</a>
+        {% else %}
+        <a href="{{baseurl}}/record/{{table.name}}">New</a>
+        {% endif %}
+    </dd>
+
+    <dd class="{%if active=='export'%}active{%endif%}">
+        <a href="{{baseurl}}/export/{{table.name}}">Export</a>
+    </dd>
+
+    <dd class="{%if active=='import'%}active{%endif%}">
+        <a href="{{baseurl}}/import/{{table.name}}">Import</a>
+    </dd>
+
+</dl>

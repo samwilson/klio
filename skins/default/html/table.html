@@ -1,0 +1,48 @@
+{%extends "page.html"%}
+
+{% block content %}
+
+{% include "subnav.html" with {'active': 'table'} %}
+
+<p>
+    &bull;
+    {{row_count}} rows &bull;
+    <a href="{{baseurl}}/record/{{table.name}}">Add new row</a> &bull;
+</p>
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            {% for column in table.columns %}
+            <th>{{column.title}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in table.rows %}
+        <tr>
+            <td><a href="{{baseurl}}/record/{{table.name}}/{{row.id}}" class="">Edit</a></td>
+            {% for column in table.columns %}
+            <td class="type-{{ column.type }} {% if column.isForeignKey %}is-foreign-key{% endif %}">
+
+                {% if column.isForeignKey %}
+                <a href="{{baseurl}}/record/{{column.getReferencedTable.name}}/{{ attribute(row, column.name) }}">
+                    {{ attribute(row, column.name~'FKTITLE') }}
+                </a>
+
+                {% else %}
+                <!--{{ row }}<br />
+                [{{row[column.name]}}]<br />-->
+                {{ attribute(row, column.name) }}
+
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<pre>{{table}}</pre>
+
+{%endblock%}

@@ -34,7 +34,5 @@ foreach (explode('/', $_SERVER['PHP_SELF']) as $part) {
 //print_r($baseurl);echo "\n";
 //exit();
 
-$swfw = new SWFW(__DIR__, $baseurl);
-//$swfw->setBaseDir(__DIR__);
-//$swfw->setBaseUrl();
-$swfw->run();
+$klio = new Klio(__DIR__, $baseurl);
+$klio->run();
