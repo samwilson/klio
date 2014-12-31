@@ -245,6 +245,16 @@ class Column
     }
 
     /**
+     * Whether or not this column is an auto-incrementing integer.
+     * 
+     * @return boolean True if this column has AUTO_INCREMENT set, false otherwise.
+     */
+    public function isAutoIncrement()
+    {
+        return $this->_isAutoIncrement;
+    }
+
+    /**
      * Whether or not this column is a foreign key.
      *
      * @return boolean True if $this->_references is not empty, otherwise false.
@@ -257,9 +267,9 @@ class Column
     /**
      * Get an array of attributes
      */
-    public function getHtmlAttrs() {
+    public function getHtmlAttrs()
+    {
         $attrs = array();
-        
     }
 
     /**
@@ -307,7 +317,7 @@ class Column
         $decimal_pattern = '/^decimal\((\d+),(\d+)\)/';
         $float_pattern = '/^float\((\d+),(\d+)\)/';
         $integer_pattern = '/^((?:big|medium|small|tiny)?int)\(?(\d+)\)?/';
-        $integer_pattern = '/.*?(int)\(+(\d+)\)/';
+        $integer_pattern = '/.*?(int|year)\(+(\d+)\)/';
         $enum_pattern = '/^(enum|set)\(\'(.*?)\'\)/';
 
         if (preg_match($varchar_pattern, $typeString, $matches)) {
@@ -343,7 +353,7 @@ class Column
             $ref = '';
         }
         $size = ($this->_size > 0) ? "($this->_size)" : '';
-        return $this->_name.' '.strtoupper($this->_type).$size.$pk.$auto.$ref;
+        return $this->_name . ' ' . strtoupper($this->_type) . $size . $pk . $auto . $ref;
     }
 
     /**

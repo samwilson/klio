@@ -4,12 +4,14 @@
 
 {% include "subnav.html" with {'active': 'record'} %}
 
-<form method="post" action="{{baseurl}}/record/{{table.name}}/{{record.id}}">
+<form method="post" action="{{baseurl}}/record/{{table.name}}/{{record.id}}" data-abide>
     {% for column in columns %}
 
     <div class="row">
         <div class="small-2 columns">
-            <label for="{{column.name}}" class="right inline">{{column.title}}</label>
+            <label for="{{column.name}}" class="right inline">{{column.title}}
+            {% if column.isRequired and not column.isAutoIncrement %}*{% endif %}
+            </label>
         </div>
         <div class="small-7 columns">
             <!--{% include ["field_#{column.type}.html", "field.html"] %} -->
@@ -24,12 +26,17 @@
                 {% endfor %}
             </select>
 
+            {% elseif column.type=='text' %}
+            <textarea name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
+                      {% if column.isRequired %}required{% endif %} rows="5"
+                      >{{ attribute(record, column.name)}}</textarea>
+
             {% else %}
             <input type="text" name="{{column.name}}" id="{{column.name}}" value="{{ attribute(record, column.name)}}" 
                    aria-describedby="{{column.name}}-help"
-                   {% if column.name == table.pkcolumn.name %}
-                   readonly
-                   {% endif %}
+                   {% if column.name == table.pkcolumn.name %}readonly{% endif %}
+                   {% if column.isRequired and not column.isAutoIncrement %}required{% endif %}
+                   {% if column.type == 'year' %}pattern="number"{% endif %}
                    />
 
             {% endif %}
@@ -37,7 +44,7 @@
         <div class="small-3 columns">
             <label id="{{column.name}}-help" class="inline" for="{{column.name}}">
                 <em>{{column.comment}}</em>
-                {{ column.referencedtable.title }}
+                {{ column.type }}
             </label>
         </div>
     </div>
@@ -49,6 +56,7 @@
         </div>
         <div class="small-10 columns">
             <input type="submit" value="Save" class="button" />
+            <a href="{{baseurl}}/table/{{table.name}}" class="button" title="Return to search.">Cancel</a>
         </div>
     </div>
 

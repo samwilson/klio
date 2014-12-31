@@ -20,6 +20,7 @@ class Table extends \Klio\Controller
         $view->table = $table;
         $view->columns = $table->getColumns();
         $view->title = $table->getTitle();
+        $view->subtitle = $table->getComment();
         $view->row_count = $table->countRecords();
         $view->rows = $table->getRows();
         $view->render();
