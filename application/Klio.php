@@ -21,6 +21,7 @@ class Klio
     {
         $this->setBaseUrl($baseUrl);
         $this->baseDir = $baseDir;
+        session_start();
     }
 
     public function getBaseUrl()
@@ -78,5 +79,18 @@ class Klio
             echo "Resource not found: $uri";
             exit(1);
         }
+    }
+
+    public static function getControllerNames()
+    {
+        $out = array();
+        foreach (scandir(__DIR__ . '/Klio/Controller') as $cl) {
+            $controllerName = pathinfo($cl, PATHINFO_FILENAME);
+            $controllerClass = 'Klio\Controller\\' . $controllerName;
+            if (class_exists($controllerClass)) {
+                $out[] = $controllerClass;
+            }
+        }
+        return $out;
     }
 }

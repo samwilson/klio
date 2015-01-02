@@ -4,7 +4,7 @@
 
 {% include "subnav.html" with {'active': 'record'} %}
 
-<form method="post" action="{{baseurl}}/record/{{table.name}}/{{record.id}}" data-abide>
+<form method="post" action="{{baseurl}}/record/{{table.name}}/{{record.primaryKey}}" data-abide>
     {% for column in columns %}
 
     <div class="row">
@@ -18,9 +18,14 @@
 
             {% if column.isForeignKey %}
             <select name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
+                    {% if column.isRequired %}required{% endif %}
                     >
                 {% for row in column.getReferencedTable.rows %}
-                <option value="{{ attribute(row, column.getReferencedTable.pkcolumn.name) }}">
+                <option value="{{ attribute(row, column.getReferencedTable.pkcolumn.name) }}"
+                        {% if attribute(record, column.name) == attribute(row, column.getReferencedTable.pkcolumn.name) %}
+                        selected
+                        {% endif %}
+                        >
                     {{ attribute(row, column.getReferencedTable.titlecolumn.name) }}
                 </option>
                 {% endfor %}
@@ -34,9 +39,10 @@
             {% else %}
             <input type="text" name="{{column.name}}" id="{{column.name}}" value="{{ attribute(record, column.name)}}" 
                    aria-describedby="{{column.name}}-help"
-                   {% if column.name == table.pkcolumn.name %}readonly{% endif %}
+                   {% if column.isAutoIncrement %}readonly{% endif %}
                    {% if column.isRequired and not column.isAutoIncrement %}required{% endif %}
                    {% if column.type == 'year' %}pattern="number"{% endif %}
+                   {% if column.type == 'date' %}pattern="date"{% endif %}
                    />
 
             {% endif %}
@@ -44,7 +50,12 @@
         <div class="small-3 columns">
             <label id="{{column.name}}-help" class="inline" for="{{column.name}}">
                 <em>{{column.comment}}</em>
-                {{ column.type }}
+                {% if column.isForeignKey %}
+                This field is a cross reference to
+                <a href="">{{column.getReferencedTable.title}}</a>.
+                {% endif %}
+                <code title="Column type">{{ column.type }}</code>
+                {% if column.isAutoIncrement %}A value for this field will be assigned automatically.{% endif %}
             </label>
         </div>
     </div>
@@ -55,8 +66,12 @@
         <div class="small-2 columns">
         </div>
         <div class="small-10 columns">
-            <input type="submit" value="Save" class="button" />
-            <a href="{{baseurl}}/table/{{table.name}}" class="button" title="Return to search.">Cancel</a>
+            <input type="submit" value="Save" class="button success" />
+            <a href="{{baseurl}}/table/{{table.name}}" class="button" title="Return to search">Cancel</a>
+            {% if record %}
+            <input type="hidden" name="primary_key_value" value="{{record.getPrimaryKey}}" />
+            <a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}/delete" class="button alert" title="Delete this record">Delete</a>
+            {% endif %}
         </div>
     </div>
 

@@ -2,7 +2,7 @@
 
 namespace Klio\DB;
 
-class Row
+class Record
 {
 
     /**
@@ -54,6 +54,11 @@ class Row
     public function __toString()
     {
         return print_r($this->data, TRUE);
+    }
+
+    public function getPrimaryKey()
+    {
+        return $this->data[$this->table->getPkColumn()->getName()];
     }
 
     public function getTitle()

@@ -22,7 +22,7 @@ class Table extends \Klio\Controller
         $view->title = $table->getTitle();
         $view->subtitle = $table->getComment();
         $view->row_count = $table->countRecords();
-        $view->rows = $table->getRows();
+        $view->rows = $table->getRecords();
         $view->render();
     }
 

@@ -33,7 +33,7 @@ class View
         $skinName = Settings::get('skin', 'default');
         $skindir = $this->baseDir . '/skins/' . $skinName;
         $loader = new \Twig_Loader_Filesystem($skindir . '/html');
-        
+
         $twig = new \Twig_Environment($loader, array(
             'debug' => TRUE,
             'strct_variables' => TRUE
@@ -51,5 +51,25 @@ class View
     {
         $skins = scandir($this->baseDir . '/skins');
         return preg_grep('/^\./', $skins, PREG_GREP_INVERT);
+    }
+
+    /**
+     * Display a message to the user.
+     *
+     * @param string $type One of 'success', 'warning', 'info', or 'alert'.
+     * @param string $message The text of the message.
+     * @param boolean $delayed Whether to delay the message until the next request.
+     */
+    public function message($type, $message, $delayed = FALSE)
+    {
+        $msg = array(
+            'type' => $type,
+            'message' => $message,
+        );
+        if ($delayed) {
+            $_SESSION['messages'][] = $msg;
+        } else {
+            $this->data->messages[] = $msg;
+        }
     }
 }

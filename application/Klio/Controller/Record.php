@@ -8,7 +8,7 @@ class Record extends \Klio\Controller
     public function getRoutes()
     {
         return array(
-            '/record/([^/]*)/?(.*)',
+            '/record/([^/]*)/?([^/]*)',
         );
     }
 
@@ -24,22 +24,33 @@ class Record extends \Klio\Controller
                 $this->view->referencedTables[$col->getName()] = $rt;
             }
         }
-        $row = $table->getRow($recordId);
-        if (!$row) {
-            $view->title = $table->getTitle() . ': new record';
+        $record = $table->getRecord($recordId);
+        if ($recordId && !$record) {
+            throw new \Exception("Record not found: $recordId");
+        }
+        $view->title = $table->getTitle();
+        if (!$record) {
+            $view->subtitle = 'New record';
         } else {
-            $pkColName = $table->getPkColumn()->getName();
-            $view->title = $table->getTitle() . ': edit record #' . $row->$pkColName();
-            $view->record = $row;
+            $view->subtitle = 'Edit record: ' . $record->getPrimaryKey();
+            $view->record = $record;
         }
         $view->render();
     }
 
-    public function POST($tableName, $recordId = null)
+    public function POST($tableName, $recordId = FALSE)
     {
         $this->db = $this->getDatabase();
         $table = $this->db->getTable($tableName);
-        $pkVal = $table->saveRow($_POST);
-        header("Location:$this->baseUrl/record/$tableName/$pkVal");
+
+        $existing = $table->getRecord($_POST[$table->getPkColumn()->getName()]);
+        // Make sure we're not saving over an already-existing record.
+        if (!$recordId && $existing) {
+            echo "Already exists; not updating.";
+        } else {
+            // Otherwise, create a new one.
+            $pkVal = $table->saveRecord($_POST, $recordId);
+            header("Location:$this->baseUrl/record/$tableName/$pkVal");
+        }
     }
 }

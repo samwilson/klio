@@ -1,3 +1,4 @@
-nbproject
-config.php
-vendor
+/nbproject
+/config.php
+/vendor
+/.htaccess

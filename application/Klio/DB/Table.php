@@ -61,7 +61,7 @@ class Table
      * @var integer|false The number of currently-filtered rows, or false if no
      * query has been made yet or the filters have been reset.
      */
-    protected $_row_count = FALSE;
+    protected $recordCount = FALSE;
 
     /** @var integer The current page number. */
     protected $_page = 1;
@@ -273,9 +273,9 @@ class Table
      * allows column names to begin with a number, but PHP does not variables to
      * do so.
      *
-     * @return array[array[string=>string]] The row data
+     * @return array|Record The row data
      */
-    public function getRows($with_pagination = true, $save_sql = false)
+    public function getRecords($with_pagination = true, $save_sql = false)
     {
         $columns = array();
         foreach (array_keys($this->columns) as $col) {
@@ -303,7 +303,7 @@ class Table
 
         // Run query and save SQL
         //$this->database->setFetchMode(\PDO::FETCH_ASSOC);
-        $rows = $this->database->query($sql, $params, '\Klio\DB\Row', array($this));
+        $rows = $this->database->query($sql, $params, '\Klio\DB\Record', array($this));
         //$this->database->setFetchMode(\PDO::FETCH_OBJ);
         if ($save_sql) {
             $this->saved_sql = $sql;
@@ -326,7 +326,7 @@ class Table
      * @param integer $id The ID of the record to get.
      * @return \Klio\DB\Record The record object.
      */
-    public function getRow($id)
+    public function getRecord($id)
     {
         $pk_column = $this->getPkColumn();
         $pk_name = (!$pk_column) ? 'id' : $pk_column->getName();
@@ -335,9 +335,8 @@ class Table
                 . "WHERE `$pk_name` = :$pk_name "
                 . "LIMIT 1";
         //$this->database->setFetchMode(\PDO::FETCH_ASSOC);
-        $row = $this->database->query($sql, array($pk_name => $id), '\Klio\DB\Row', array($this));
-        //print_r($row);
-        return $row->fetch();
+        $record = $this->database->query($sql, array($pk_name => $id), '\Klio\DB\Record', array($this));
+        return $record->fetch();
         //$this->database->setFetchMode(\PDO::FETCH_OBJ);
         //return new Row($row->fetch());
     }
@@ -433,14 +432,14 @@ class Table
      */
     public function countRecords()
     {
-        if (!$this->_row_count) {
+        if (!$this->recordCount) {
             $pk = $this->getPkColumn()->getName();
             $sql = 'SELECT COUNT(`' . $pk . '`) as `count` FROM `' . $this->getName() . '`';
             $params = $this->applyFilters($sql);
             $result = $this->database->query($sql, $params);
-            $this->_row_count = $result->fetchColumn();
+            $this->recordCount = $result->fetchColumn();
         }
-        return $this->_row_count;
+        return $this->recordCount;
     }
 
     /**
@@ -782,7 +781,15 @@ class Table
     public function resetFilters()
     {
         $this->_filters = array();
-        $this->_row_count = FALSE;
+        $this->recordCount = FALSE;
+    }
+
+    public function deleteRecord($primaryKeyValue)
+    {
+        $sql = "DELETE FROM `" . $this->getName() . "` "
+                . "WHERE `" . $this->getPkColumn()->getName() . "` = :primaryKeyValue";
+        $data = array('primaryKeyValue' => $primaryKeyValue);
+        return $this->database->query($sql, $data);
     }
 
     /**
@@ -793,7 +800,7 @@ class Table
      * @param array  $data  The data to insert; if 'id' is set, update.
      * @return int          The ID of the updated or inserted row.
      */
-    public function saveRow($data)
+    public function saveRecord($data, $primaryKeyValue = NULL)
     {
 
         $columns = $this->getColumns();
@@ -868,33 +875,37 @@ class Table
         }
 
         // Update?
-        $pk_name = $this->getPkColumn()->getName();
-        if (isset($data[$pk_name]) && is_numeric($data[$pk_name])) {
-            $pk_val = $data[$pk_name];
-            //unset($data[$pk_name]);
-            $sql = "UPDATE " . $this->getName() . " SET ";
+        $primaryKeyName = $this->getPkColumn()->getName();
+        if ($primaryKeyValue) {
             $pairs = array();
             foreach ($data as $col => $val) {
-                if ($col == $pk_name) {
-                    continue;
-                }
+                //if ($col == $primaryKeyName) {
+                //    continue;
+                //}
                 $pairs[] = "`$col` = :$col";
             }
-            $sql .= join(', ', $pairs) . " WHERE `$pk_name` = :$pk_name";
+            $sql = "UPDATE " . $this->getName() . " SET " . join(', ', $pairs)
+                    . " WHERE `$primaryKeyName` = :primaryKeyValue";
+            $data['primaryKeyValue'] = $primaryKeyValue;
             $this->database->query($sql, $data);
+            $newPkValue = $data[$primaryKeyName];
         }
         // Or insert?
         else {
             // Prevent PK from being empty.
-            if (empty($data[$pk_name])) {
-                unset($data[$pk_name]);
+            if (empty($data[$primaryKeyName])) {
+                unset($data[$primaryKeyName]);
             }
             $sql = "INSERT INTO " . $this->getName()
                     . "\n( `" . join("`, `", array_keys($data)) . "` ) VALUES "
                     . "\n( :" . join(", :", array_keys($data)) . " )";
             $this->database->query($sql, $data);
-            $pk_val = $this->database->lastInsertId();
+            $newPkValue = $this->database->lastInsertId();
+            if (!$newPkValue) {
+                $row = $this->getRow($data[$primaryKeyName]);
+                $newPkValue = $row->$primaryKeyName();
+            }
         }
-        return $pk_val;
+        return $newPkValue;
     }
 }

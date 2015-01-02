@@ -73,8 +73,4 @@ class Controller
         return array();
     }
 
-    public function message($type, $message, $delayed = FALSE)
-    {
-        
-    }
 }

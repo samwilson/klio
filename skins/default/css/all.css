@@ -3,5 +3,8 @@
 
 pre.queries { margin:0 1em }
 
-table td.type-int { text-align:right }
 is-foreign-key { text-align:left }
+
+table tbody th,
+table tbody td { vertical-align:top }
+table tbody td.type-int { text-align:right }

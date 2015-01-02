@@ -4,11 +4,7 @@
 
 {% include "subnav.html" with {'active': 'table'} %}
 
-<p>
-    &bull;
-    {{row_count}} rows &bull;
-    <a href="{{baseurl}}/record/{{table.name}}">Add new row</a> &bull;
-</p>
+<p>{{row_count}} records</p>
 <table>
     <thead>
         <tr>
@@ -19,21 +15,21 @@
         </tr>
     </thead>
     <tbody>
-        {% for row in table.rows %}
+        {% for record in table.records %}
         <tr>
-            <td><a href="{{baseurl}}/record/{{table.name}}/{{row.id}}" class="">Edit</a></td>
+            <td><a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}" class="">Edit</a></td>
             {% for column in table.columns %}
             <td class="type-{{ column.type }} {% if column.isForeignKey %}is-foreign-key{% endif %}">
 
                 {% if column.isForeignKey %}
-                <a href="{{baseurl}}/record/{{column.getReferencedTable.name}}/{{ attribute(row, column.name) }}">
-                    {{ attribute(row, column.name~'FKTITLE') }}
+                <a href="{{baseurl}}/record/{{column.getReferencedTable.name}}/{{ attribute(record, column.name) }}">
+                    {{ attribute(record, column.name~'FKTITLE') }}
                 </a>
 
                 {% else %}
                 <!--{{ row }}<br />
                 [{{row[column.name]}}]<br />-->
-                {{ attribute(row, column.name) }}
+                {{ attribute(record, column.name) }}
 
                 {% endif %}
             </td>

@@ -37,6 +37,13 @@
             </nav>
         </header>
 
+        {% for alert in alerts %}
+        <div data-alert class="alert-box {{ alert.type }}">
+            {{ alert.message }}
+            <a href="#" class="close">&times;</a>
+        </div>
+        {% endfor %}
+
         <div id="content">
             <h1>
                 {{title}}
