@@ -1,10 +1,19 @@
 language: php
+
 php:
-  - 5.5
+  - 5.3
   - 5.4
+  - 5.5
+  - 5.6
   - hhvm
+
+script:
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpunit
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --report=full --standard=PSR2 $TRAVIS_BUILD_DIR/application
+
 before_script:
   - mysql -e 'create database klio_test;'
+
 install:
   - composer install
   - echo "<?php \$database_config = array('database'=>'klio','username'=>'root','password'=>'');" >> $TRAVIS_BUILD_DIR/config.php
