@@ -71,7 +71,7 @@ class Database
                     . ");");
             $this->query("ALTER TABLE `changes`"
                     . " ADD FOREIGN KEY ( `changeset_id` )"
-                    . " REFERENCES `klio`.`changes` (`id`)"
+                    . " REFERENCES `changes` (`id`)"
                     . " ON DELETE CASCADE ON UPDATE CASCADE;");
         }
         $this->table_names = FALSE;
