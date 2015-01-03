@@ -3,6 +3,7 @@ php:
   - 5.5
   - 5.4
   - hhvm
-composer install
+install:
+  - composer install
 before_script:
   - mysql -e 'create database klio_test;'
