@@ -17,16 +17,65 @@ class Database
     /** @var array|string */
     static protected $queries;
 
-    public function __construct()
+    public function __construct($test = FALSE)
     {
-        require dirname($_SERVER['SCRIPT_FILENAME']) . '/config.php';
+        // Try to find the config file.
+        $dirs = array(
+            dirname(__DIR__ . '/../..'),
+            dirname(\Klio\Arr::get($_SERVER, 'SCRIPT_FILENAME')),
+            \Klio\Arr::get($_SERVER, 'PWD'),
+        );
+        foreach ($dirs as $dir) {
+            $configFile = $dir . '/config.php';
+            if (file_exists($configFile)) {
+                require $configFile;
+            }
+            if (isset($database_config)) {
+                break;
+            }
+        }
+        // Connect to the database.
         $host = \Klio\Arr::get($database_config, 'hostname', 'localhost');
-        $dsn = 'mysql:host=' . $host . ';dbname=' . $database_config['database'];
+        $dbname = $database_config['database'] . ($test ? '_test' : '');
+        $dsn = "mysql:host=$host;dbname=$dbname";
         $attr = array(\PDO::ATTR_TIMEOUT => 10);
         self::$pdo = new \PDO($dsn, $database_config['username'], $database_config['password'], $attr);
         self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->setFetchMode(\PDO::FETCH_OBJ);
         return true;
+    }
+
+    public function install()
+    {
+        if (!$this->getTable('settings')) {
+            $this->query("CREATE TABLE settings ("
+                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                    . " name VARCHAR(65) NOT NULL UNIQUE,"
+                    . " value TEXT NOT NULL"
+                    . ");");
+        }
+        if (!$this->getTable('changesets')) {
+            $this->query("CREATE TABLE changesets ("
+                    . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
+                    . " date_and_time TIMESTAMP NOT NULL,"
+                    . " user_id INT(5) NULL DEFAULT NULL,"
+                    . " comments VARCHAR(140) NULL DEFAULT NULL"
+                    . ");");
+        }
+        if (!$this->getTable('changes')) {
+            $this->query("CREATE TABLE changes ("
+                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                    . " changeset_id INT(10) NOT NULL,"
+                    . " user_id INT(5) NULL DEFAULT NULL,"
+                    . " comments VARCHAR(140) NULL DEFAULT NULL"
+                    . ");");
+            $this->query("ALTER TABLE `changes`"
+                    . " ADD FOREIGN KEY ( `changeset_id` )"
+                    . " REFERENCES `klio`.`changes` (`id`)"
+                    . " ON DELETE CASCADE ON UPDATE CASCADE;");
+        }
+        $this->table_names = FALSE;
+        $this->tables = array();
     }
 
     public static function getQueries()
