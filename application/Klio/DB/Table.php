@@ -817,34 +817,38 @@ class Table
 
             $column = $columns[$field];
 
-            /*
-             * Booleans
-             */
+
             if ($column->getType() == 'int' && $column->getSize() == 1) {
+                /*
+                 * Booleans
+                 */
+                $zeroValues = array(0, '0', 'false', 'FALSE', 'off', 'OFF', 'no', 'NO');
                 if (($value == null || $value == '') && !$column->isRequired()) {
                     $data[$field] = null;
-                } elseif ($value === '0' || $value === 0 || strcasecmp($value, 'false') === 0 || strcasecmp($value, 'off') === 0 || strcasecmp($value, 'no') === 0) {
+                } elseif (in_array($value, $zeroValues, true)) {
                     $data[$field] = 0;
                 } else {
                     $data[$field] = 1;
                 }
-            } /*
-             * Nullable empty fields should be NULL.
-             */ elseif (!$column->isRequired() && empty($value)) {
+            } elseif (!$column->isRequired() && empty($value)) {
+                /*
+                 * Nullable empty fields should be NULL.
+                 */
                 $data[$field] = null;
-            } /*
-             * Foreign keys
-             */ elseif ($column->isForeignKey() && ($value <= 0 || $value == '')) {
+            } elseif ($column->isForeignKey() && ($value <= 0 || $value == '')) {
+                /*
+                 * Foreign keys
+                 */
                 $data[$field] = null;
-            } /*
-             * Numbers
-             */ elseif (!is_numeric($value) && (
-                    substr($column->getType(), 0, 3) == 'int' || substr($column->getType(), 0, 7) == 'decimal' || substr($column->getType(), 0, 5) == 'float')
-            ) {
+            } elseif (!is_numeric($value) && $column->isNumeric()) {
+                /*
+                 * Numbers
+                 */
                 $data[$field] = null; // Stops empty strings being turned into 0s.
-            } /*
-             * Dates & times
-             */ elseif (($column->getType() == 'date' || $column->getType() == 'datetime' || $column->getType() == 'time') && $value == '') {
+            } elseif (($column->getType() == 'date' || $column->getType() == 'datetime' || $column->getType() == 'time') && $value == '') {
+                /*
+                 * Dates & times
+                 */
                 $data[$field] = null;
             }
         }

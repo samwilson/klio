@@ -255,6 +255,17 @@ class Column
     }
 
     /**
+     * Whether or not this column is an integer, float, or decimal column.
+     */
+    public function isNumeric()
+    {
+        $isInt = substr($this->getType(), 0, 3) == 'int';
+        $isDecimal = substr($this->getType(), 0, 7) == 'decimal';
+        $isFloat = substr($this->getType(), 0, 5) == 'float';
+        return $isInt || $isDecimal || $isFloat;
+    }
+
+    /**
      * Whether or not this column is a foreign key.
      *
      * @return boolean True if $this->_references is not empty, otherwise false.
