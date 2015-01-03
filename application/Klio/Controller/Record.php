@@ -14,9 +14,8 @@ class Record extends \Klio\Controller
 
     public function GET($tableName, $recordId = null)
     {
-        $this->db = $this->getDatabase();
-        $table = $this->db->getTable($tableName);
         $view = $this->getView('record');
+        $table = $this->db->getTable($tableName);
         $view->table = $table;
         $view->columns = $table->getColumns();
         foreach ($table->getColumns() as $col) {

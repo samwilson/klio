@@ -4,7 +4,10 @@
 
 {% include "subnav.html" with {'active': 'table'} %}
 
-<p>{{row_count}} records</p>
+<p>{{row_count}} record{% if row_count > 1 %}s{% endif %}</p>
+
+{% include "pagination.html" %}
+
 <table>
     <thead>
         <tr>
@@ -15,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for record in table.records %}
+        {% for record in records %}
         <tr>
             <td><a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}" class="">Edit</a></td>
             {% for column in table.columns %}
@@ -38,7 +41,5 @@
         {% endfor %}
     </tbody>
 </table>
-
-<pre>{{table}}</pre>
 
 {%endblock%}

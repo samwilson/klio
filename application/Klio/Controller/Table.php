@@ -8,21 +8,24 @@ class Table extends \Klio\Controller
     public function getRoutes()
     {
         return array(
-            '/table/(.*)',
+            '/table/([^/]*)/?p?(\d*)',
         );
     }
 
-    public function GET($tableName)
+    public function GET($tableName, $pageNum = 1)
     {
-        $this->db = $this->getDatabase();
+        if (empty($pageNum)) {
+            $pageNum = 1;
+        }
         $view = $this->getView('table');
         $table = $this->db->getTable($tableName);
+        $table->setCurrentPageNum($pageNum);
         $view->table = $table;
         $view->columns = $table->getColumns();
         $view->title = $table->getTitle();
         $view->subtitle = $table->getComment();
         $view->row_count = $table->countRecords();
-        $view->rows = $table->getRecords();
+        $view->records = $table->getRecords();
         $view->render();
     }
 

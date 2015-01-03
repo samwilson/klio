@@ -64,7 +64,7 @@ class Table
     protected $recordCount = FALSE;
 
     /** @var integer The current page number. */
-    protected $_page = 1;
+    protected $currentPageNum = 1;
 
     /**
      * Create a new database table object.
@@ -275,7 +275,7 @@ class Table
      *
      * @return array|Record The row data
      */
-    public function getRecords($with_pagination = true, $save_sql = false)
+    public function getRecords($withPagination = true, $save_sql = false)
     {
         $columns = array();
         foreach (array_keys($this->columns) as $col) {
@@ -293,11 +293,11 @@ class Table
         $params = $this->applyFilters($sql);
 
         // Then limit to the ones on the current page.
-        if ($with_pagination) {
-            $rowsPerPage = \Klio\Settings::get('rows_per_page', 30);
-            $sql .= ' LIMIT ' . $rowsPerPage;
+        if ($withPagination) {
+            $recordsPerPage = \Klio\Settings::recordsPerPage();
+            $sql .= ' LIMIT ' . $recordsPerPage;
             if ($this->page() > 1) {
-                $sql .= ' OFFSET ' . ($rowsPerPage * ($this->page() - 1));
+                $sql .= ' OFFSET ' . ($recordsPerPage * ($this->getCurrentPageNum() - 1));
             }
         }
 
@@ -310,6 +310,16 @@ class Table
             $this->saved_parameters = $params;
         }
         return $rows;
+    }
+
+    public function getCurrentPageNum()
+    {
+        return $this->currentPageNum;
+    }
+
+    public function setCurrentPageNum($currentPageNum)
+    {
+        $this->currentPageNum = $currentPageNum;
     }
 
     public function getSavedQuery()
@@ -381,29 +391,9 @@ class Table
         return $this->_operators;
     }
 
-    /**
-     * Get the pagination object for this table.
-     *
-     * @return Pager_Sliding
-     */
-    public function getPagination()
-    {
-        if (!isset($this->_pagination)) {
-            $total_row_count = $this->countRecords();
-            $this->_pagination = array(
-                'total_count' => $total_row_count,
-                'rows_per_page' => 10,
-                'pages' => ceil($total_row_count / 10),
-                'starting_row' => 1,
-                'page' => $this->page(),
-            );
-        }
-        return $this->_pagination;
-    }
-
     public function getPageCount()
     {
-        return ceil($this->countRecords() / ROWS_PER_PAGE);
+        return ceil($this->countRecords() / \Klio\Settings::recordsPerPage());
     }
 
     /**
@@ -415,9 +405,9 @@ class Table
     public function page($page = false)
     {
         if ($page !== false) {
-            $this->_page = $page;
+            $this->currentPageNum = $page;
         } else {
-            return $this->_page;
+            return $this->currentPageNum;
         }
     }
 
@@ -902,7 +892,7 @@ class Table
             $this->database->query($sql, $data);
             $newPkValue = $this->database->lastInsertId();
             if (!$newPkValue) {
-                $row = $this->getRow($data[$primaryKeyName]);
+                $row = $this->getRecord($data[$primaryKeyName]);
                 $newPkValue = $row->$primaryKeyName();
             }
         }

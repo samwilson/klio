@@ -20,7 +20,7 @@
             <select name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
                     {% if column.isRequired %}required{% endif %}
                     >
-                {% for row in column.getReferencedTable.rows %}
+                {% for row in column.getReferencedTable.records %}
                 <option value="{{ attribute(row, column.getReferencedTable.pkcolumn.name) }}"
                         {% if attribute(record, column.name) == attribute(row, column.getReferencedTable.pkcolumn.name) %}
                         selected
@@ -52,7 +52,7 @@
                 <em>{{column.comment}}</em>
                 {% if column.isForeignKey %}
                 This field is a cross reference to
-                <a href="">{{column.getReferencedTable.title}}</a>.
+                <a href="{{baseurl}}/table/{{column.getReferencedTable.name}}">{{column.getReferencedTable.title}}</a>.
                 {% endif %}
                 <code title="Column type">{{ column.type }}</code>
                 {% if column.isAutoIncrement %}A value for this field will be assigned automatically.{% endif %}

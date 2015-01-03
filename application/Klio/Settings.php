@@ -36,4 +36,9 @@ class Settings
     {
         return self::get('site_title', \Klio::name());
     }
+
+    public static function recordsPerPage()
+    {
+        return self::get('records_per_page', 10);
+    }
 }

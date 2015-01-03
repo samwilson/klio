@@ -16,6 +16,7 @@ class Controller
     {
         $this->baseDir = $baseDir;
         $this->baseUrl = $baseUrl;
+        $this->db = $this->getDatabase();
     }
 
     /**

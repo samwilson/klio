@@ -1,0 +1,38 @@
+
+{% if table.pageCount > 1 %}
+<ul class="pagination">
+
+    <li class="arrow
+        {% if table.currentPageNum < 2 %}unavailable{% endif %}
+        "
+        >
+        <a {% if table.currentPageNum > 1 %}
+            href="{{baseurl}}/table/{{table.name}}/{{table.currentPageNum - 1}}"
+            title="Go to page {{table.currentPageNum - 1}}"
+            {% endif %}
+            >&larr; Previous</a>
+    </li>
+
+    {% for p in 1..table.pageCount %}
+    <li class="{% if table.currentPageNum == p %}current{% endif %}">
+        <a {% if table.currentPageNum != p %}
+            href="{{baseurl}}/table/{{table.name}}/{{p}}"
+            {% endif %}
+            >
+            {{p}}
+        </a>
+    </li>
+    {% endfor %}
+
+    <li class="arrow
+        {% if table.currentPageNum == table.pageCount %}unavailable{% endif %}
+        ">
+        <a {% if table.currentPageNum < table.pageCount %}
+            href="{{baseurl}}/table/{{table.name}}/{{table.currentPageNum+1}}"
+            title="Go to page {{table.currentPageNum+1}}"
+            {% endif %}
+            >Next &rarr;</a>
+    </li>
+
+</ul>
+{% endif %}

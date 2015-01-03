@@ -42,7 +42,7 @@ class Record
             if ($this->table->getColumn($name)->isForeignKey()) {
                 $referencedTable = $this->table->getColumn($name)->getReferencedTable();
                 $fkTitleColName = $referencedTable->getTitleColumn()->getName();
-                return $referencedTable->getRow($this->data[$name])->$fkTitleColName();
+                return $referencedTable->getRecord($this->data[$name])->$fkTitleColName();
             }
         }
         // Standard column values.

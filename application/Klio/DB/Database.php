@@ -103,6 +103,7 @@ class Database
             foreach ($tables as $table) {
                 $this->table_names[] = $table[0];
             }
+            //sort($this->table_names);
         }
         return $this->table_names;
     }
