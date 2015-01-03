@@ -8,8 +8,8 @@ php:
   - hhvm
 
 script:
-  - phpunit
-  - phpcs --report=full --standard=PSR2 $TRAVIS_BUILD_DIR/application
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpunit
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --report=full --standard=PSR2 $TRAVIS_BUILD_DIR/application
 
 before_script:
   - mysql -e 'create database klio_test;'
