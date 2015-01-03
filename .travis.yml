@@ -4,3 +4,5 @@ php:
   - 5.4
   - hhvm
 composer install
+before_script:
+  - mysql -e 'create database klio_test;'
