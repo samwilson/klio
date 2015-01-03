@@ -12,7 +12,7 @@ class Admin extends \Klio\Controller
         );
     }
 
-    public function GET()
+    public function get()
     {
         $view = $this->getView('admin');
         $view->title = 'Administration';
@@ -22,7 +22,7 @@ class Admin extends \Klio\Controller
         echo $view->render();
     }
 
-    public function POST()
+    public function post()
     {
         if (isset($_POST)) {
             \Klio\Settings::save('site_title', $_POST['site_title']);

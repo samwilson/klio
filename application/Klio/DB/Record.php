@@ -53,7 +53,7 @@ class Record
 
     public function __toString()
     {
-        return print_r($this->data, TRUE);
+        return print_r($this->data, true);
     }
 
     public function getPrimaryKey()

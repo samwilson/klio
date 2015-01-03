@@ -12,7 +12,7 @@ class RecordDelete extends \Klio\Controller
         );
     }
 
-    public function GET($tableName, $recordId = null)
+    public function get($tableName, $recordId = null)
     {
         $this->db = $this->getDatabase();
         $table = $this->db->getTable($tableName);
@@ -30,7 +30,7 @@ class RecordDelete extends \Klio\Controller
         $view->render();
     }
 
-    public function POST($tableName, $recordId = null)
+    public function post($tableName, $recordId = null)
     {
         if (!\Klio\Arr::get($_POST, 'confirm')) {
             header("Location:$this->baseUrl/record/$tableName/$recordId");

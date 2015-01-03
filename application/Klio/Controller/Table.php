@@ -12,11 +12,12 @@ class Table extends \Klio\Controller
         );
     }
 
-    public function GET($tableName, $pageNum = 1)
+    public function get($tableName, $pageNum = 1)
     {
         if (empty($pageNum)) {
             $pageNum = 1;
         }
+        $this->db = $this->getDatabase();
         $view = $this->getView('table');
         $table = $this->db->getTable($tableName);
         $table->setCurrentPageNum($pageNum);
@@ -29,7 +30,7 @@ class Table extends \Klio\Controller
         $view->render();
     }
 
-    public function POST()
+    public function post()
     {
         
     }

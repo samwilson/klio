@@ -17,7 +17,7 @@ class Database
     /** @var array|string */
     static protected $queries;
 
-    public function __construct($test = FALSE)
+    public function __construct($test = false)
     {
         if (self::$pdo) {
             return;
@@ -50,33 +50,41 @@ class Database
     public function install()
     {
         if (!$this->getTable('settings')) {
-            $this->query("CREATE TABLE settings ("
-                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                    . " name VARCHAR(65) NOT NULL UNIQUE,"
-                    . " value TEXT NOT NULL"
-                    . ");");
+            $this->query(
+                "CREATE TABLE settings ("
+                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                . " name VARCHAR(65) NOT NULL UNIQUE,"
+                . " value TEXT NOT NULL"
+                . ");"
+            );
         }
         if (!$this->getTable('changesets')) {
-            $this->query("CREATE TABLE changesets ("
-                    . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
-                    . " date_and_time TIMESTAMP NOT NULL,"
-                    . " user_id INT(5) NULL DEFAULT NULL,"
-                    . " comments VARCHAR(140) NULL DEFAULT NULL"
-                    . ");");
+            $this->query(
+                "CREATE TABLE changesets ("
+                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
+                . " date_and_time TIMESTAMP NOT NULL,"
+                . " user_id INT(5) NULL DEFAULT NULL,"
+                . " comments VARCHAR(140) NULL DEFAULT NULL"
+                . ");"
+            );
         }
         if (!$this->getTable('changes')) {
-            $this->query("CREATE TABLE changes ("
-                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                    . " changeset_id INT(10) NOT NULL,"
-                    . " user_id INT(5) NULL DEFAULT NULL,"
-                    . " comments VARCHAR(140) NULL DEFAULT NULL"
-                    . ");");
-            $this->query("ALTER TABLE `changes`"
-                    . " ADD FOREIGN KEY ( `changeset_id` )"
-                    . " REFERENCES `changes` (`id`)"
-                    . " ON DELETE CASCADE ON UPDATE CASCADE;");
+            $this->query(
+                "CREATE TABLE changes ("
+                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                . " changeset_id INT(10) NOT NULL,"
+                . " user_id INT(5) NULL DEFAULT NULL,"
+                . " comments VARCHAR(140) NULL DEFAULT NULL"
+                . ");"
+            );
+            $this->query(
+                "ALTER TABLE `changes`"
+                . " ADD FOREIGN KEY ( `changeset_id` )"
+                . " REFERENCES `changes` (`id`)"
+                . " ON DELETE CASCADE ON UPDATE CASCADE;"
+            );
         }
-        $this->table_names = FALSE;
+        $this->table_names = false;
         $this->tables = array();
     }
 
@@ -101,12 +109,12 @@ class Database
 
     /**
      * Get a result statement for a given query. Handles errors.
-     * 
+     *
      * @param string $sql The SQL statement to execute.
      * @param array $params Array of param => value pairs.
      * @return \PDOStatement Resulting PDOStatement.
      */
-    public function query($sql, $params = false, $class = FALSE, $classArgs = FALSE)
+    public function query($sql, $params = false, $class = false, $classArgs = false)
     {
         if (!empty($class) && !class_exists($class)) {
             throw new \Exception("Class not found: $class");
@@ -175,7 +183,7 @@ class Database
     public function getTable($name)
     {
         if (!in_array($name, $this->getTableNames())) {
-            return FALSE;
+            return false;
         }
         if (!isset($this->tables[$name])) {
             $specificTableClass = '\Klio\DB\Table\\' . \Klio\Text::camelcase($name);

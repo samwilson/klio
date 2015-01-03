@@ -12,7 +12,7 @@ class Index extends \Klio\Controller
         );
     }
 
-    public function GET()
+    public function get()
     {
         $this->db = $this->getDatabase();
         $view = $this->getView('index');

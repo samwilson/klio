@@ -16,7 +16,6 @@ class Controller
     {
         $this->baseDir = $baseDir;
         $this->baseUrl = $baseUrl;
-        $this->db = $this->getDatabase();
     }
 
     /**
@@ -29,9 +28,10 @@ class Controller
             return new DB\Database();
         } catch (\PDOException $e) {
             $installUrl = $this->getBaseUrl() . '/install';
-            $errorView = new View('error');
+            $errorView = $this->getView('error');
             $errorView->title = 'Error';
-            $errorView->message = 'Unable to get the database.<br /><a href="' . $installUrl . '" class="button radius">Install or upgrade</a>';
+            $errorView->message = 'Unable to get the database.<br />'
+                    . '<a href="' . $installUrl . '" class="button radius">Install or upgrade</a>';
             $errorView->baseurl = $this->getBaseUrl();
             $errorView->render();
             exit(1);
@@ -73,5 +73,4 @@ class Controller
     {
         return array();
     }
-
 }

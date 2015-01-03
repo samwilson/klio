@@ -18,7 +18,7 @@ class View
     {
         $this->baseDir = $baseDir;
         $this->template = $template;
-        $this->data['app_title'] = \Klio::name() . ' ' . \Klio::version();
+        $this->data['app_title'] = \Klio\App::name() . ' ' . \Klio\App::version();
         $this->data['site_title'] = Settings::get('site_title', $this->data['app_title']);
     }
 
@@ -35,8 +35,8 @@ class View
         $loader = new \Twig_Loader_Filesystem($skindir . '/html');
 
         $twig = new \Twig_Environment($loader, array(
-            'debug' => TRUE,
-            'strct_variables' => TRUE
+            'debug' => true,
+            'strct_variables' => true
         ));
         $twig->addExtension(new \Twig_Extension_Debug());
         //$twig = new \Twig_Environment($loader);
@@ -60,7 +60,7 @@ class View
      * @param string $message The text of the message.
      * @param boolean $delayed Whether to delay the message until the next request.
      */
-    public function message($type, $message, $delayed = FALSE)
+    public function message($type, $message, $delayed = false)
     {
         $msg = array(
             'type' => $type,

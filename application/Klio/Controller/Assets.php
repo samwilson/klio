@@ -12,7 +12,7 @@ class Assets extends \Klio\Controller
         );
     }
 
-    public function GET($file)
+    public function get($file)
     {
         header('Content-Type:text/css');
         $skin = \Klio\Settings::get('skin', 'default');

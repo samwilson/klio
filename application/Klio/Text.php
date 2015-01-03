@@ -7,7 +7,7 @@ class Text
 
     /**
      * Turn a spaced or underscored string to camelcase (with no spaces or underscores).
-     * 
+     *
      * @param string $str
      * @return string
      */

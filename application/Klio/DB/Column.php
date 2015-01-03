@@ -8,101 +8,101 @@ class Column
     /**
      * @var Webdb_DBMS_Table The table to which this column belongs.
      */
-    private $_table;
+    private $table;
 
     /** @var string The name of this column. */
-    private $_name;
+    private $name;
 
     /** @var string The type of this column. */
-    private $_type;
+    private $type;
 
     /** @var integer The size, or length, of this column. */
-    private $_size;
+    private $size;
 
     /** @var string This column's collation. */
-    private $_collation;
+    private $collation;
 
     /**
      * @var boolean Whether or not this column is required, i.e. is NULL = not
      * required = false; and NOT NULL = required = true.
      */
-    private $_required = FALSE;
+    private $required = false;
 
     /** @var boolean Whether or not this column is the Primary Key. */
-    private $_isPK = FALSE;
+    private $isPrimaryKey = false;
 
     /** @var boolean Whether or not this column is a Unique Key. */
-    private $_isUnique = FALSE;
+    private $isUnique = false;
 
     /** @var mixed The default value for this column. */
-    private $_default;
+    private $defaultValue;
 
     /** @var boolean Whether or not this column is auto-incrementing. */
-    private $_isAutoIncrement = FALSE;
+    private $isAutoIncrement = false;
 
     /**
      * @var string A comma-separated list of the privileges that the database
      * user has for this column.
      * For example: 'select,insert,update,references'
      */
-    private $_db_user_privileges;
+    private $dbUserPrivileges;
 
     /** @var string The comment attached to this column. */
-    private $_comment;
+    private $comment;
 
     /**
-     * @var Webdb_DBMS_Table|false The table that this column refers to, or
+     * @var Table|false The table that this column refers to, or
      * false if it is not a foreign key.
      */
-    private $_references = FALSE;
+    private $references = false;
 
     public function __construct(Database $database, Table $table, $info)
     {
 
         // Table
-        $this->_table = $table;
+        $this->table = $table;
 
         // Name
-        $this->_name = $info->Field;
+        $this->name = $info->Field;
 
         // Type
         $this->parseType($info->Type);
 
         // Default
-        $this->_default = $info->Default;
+        $this->defaultValue = $info->Default;
 
         // Primary key
         if (strtoupper($info->Key) == 'PRI') {
-            $this->_isPK = true;
+            $this->isPrimaryKey = true;
             if ($info->Extra == 'auto_increment') {
-                $this->_isAutoIncrement = true;
+                $this->isAutoIncrement = true;
             }
         }
 
         // Unique key
         if (strtoupper($info->Key) == 'UNI') {
-            $this->_isUnique = true;
+            $this->isUnique = true;
         }
 
         // Comment
-        $this->_comment = $info->Comment;
+        $this->comment = $info->Comment;
 
         // Collation
-        $this->_collation = $info->Collation;
+        $this->collation = $info->Collation;
 
         // NULL?
         if ($info->Null == 'NO') {
-            $this->_required = TRUE;
+            $this->required = true;
         }
 
         // Is this a foreign key?
-        if (in_array($this->_name, $table->getForeignKeyNames())) {
+        if (in_array($this->name, $table->getForeignKeyNames())) {
             $referencedTables = $table->getReferencedTables();
-            $this->_references = $referencedTables[$this->_name];
+            $this->references = $referencedTables[$this->name];
         }
 
         // DB user privileges
-        $this->_db_user_privileges = $info->Privileges;
+        $this->dbUserPrivileges = $info->Privileges;
     }
 
     public function can($perm)
@@ -131,12 +131,12 @@ class Column
     {
         $db_privs = array('select', 'update', 'insert', 'delete');
         if (!in_array($privilege, $db_privs)) {
-            return TRUE;
+            return true;
         }
         $has_priv = false;
         $privs = explode(',', $privilege);
         foreach ($privs as $priv) {
-            if (strpos($this->_db_user_privileges, $priv) !== false) {
+            if (strpos($this->dbUserPrivileges, $priv) !== false) {
                 $has_priv = true;
             }
         }
@@ -150,7 +150,7 @@ class Column
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -178,7 +178,7 @@ class Column
      */
     public function getType()
     {
-        return $this->_type;
+        return $this->type;
     }
 
     /**
@@ -188,7 +188,7 @@ class Column
      */
     public function getComment()
     {
-        return $this->_comment;
+        return $this->comment;
     }
 
     /**
@@ -198,10 +198,10 @@ class Column
      */
     public function getDefault()
     {
-        if ($this->_default == 'CURRENT_TIMESTAMP') {
+        if ($this->defaultValue == 'CURRENT_TIMESTAMP') {
             return date('Y-m-d h:i:s');
         }
-        return $this->_default;
+        return $this->defaultValue;
     }
 
     /**
@@ -211,7 +211,7 @@ class Column
      */
     public function getSize()
     {
-        return $this->_size;
+        return $this->size;
     }
 
     /**
@@ -221,7 +221,7 @@ class Column
      */
     public function isRequired()
     {
-        return $this->_required;
+        return $this->required;
     }
 
     /**
@@ -231,7 +231,7 @@ class Column
      */
     public function isPrimaryKey()
     {
-        return $this->_isPK;
+        return $this->isPrimaryKey;
     }
 
     /**
@@ -241,17 +241,17 @@ class Column
      */
     public function isUniqueKey()
     {
-        return $this->_isUnique;
+        return $this->isUnique;
     }
 
     /**
      * Whether or not this column is an auto-incrementing integer.
-     * 
+     *
      * @return boolean True if this column has AUTO_INCREMENT set, false otherwise.
      */
     public function isAutoIncrement()
     {
-        return $this->_isAutoIncrement;
+        return $this->isAutoIncrement;
     }
 
     /**
@@ -261,7 +261,7 @@ class Column
      */
     public function isForeignKey()
     {
-        return !empty($this->_references);
+        return !empty($this->references);
     }
 
     /**
@@ -280,7 +280,7 @@ class Column
      */
     public function getReferencedTable()
     {
-        return $this->_table->getDatabase()->getTable($this->_references);
+        return $this->table->getDatabase()->getTable($this->references);
     }
     /**
      * @return string|false The name of the referenced table or false if this is
@@ -298,7 +298,7 @@ class Column
      */
     public function getTable()
     {
-        return $this->_table;
+        return $this->table;
     }
 
     /**
@@ -321,39 +321,39 @@ class Column
         $enum_pattern = '/^(enum|set)\(\'(.*?)\'\)/';
 
         if (preg_match($varchar_pattern, $typeString, $matches)) {
-            $this->_type = $matches[1];
-            $this->_size = $matches[2];
+            $this->type = $matches[1];
+            $this->size = $matches[2];
         } elseif (preg_match($decimal_pattern, $typeString, $matches)) {
-            $this->_type = 'decimal';
+            $this->type = 'decimal';
             //$colData['precision'] = $matches[1];
             //$colData['scale'] = $matches[2];
         } elseif (preg_match($float_pattern, $typeString, $matches)) {
-            $this->_type = 'float';
+            $this->type = 'float';
             //$colData['precision'] = $matches[1];
             //$colData['scale'] = $matches[2];
         } elseif (preg_match($integer_pattern, $typeString, $matches)) {
-            $this->_type = $matches[1];
-            $this->_size = $matches[2];
+            $this->type = $matches[1];
+            $this->size = $matches[2];
         } elseif (preg_match($enum_pattern, $typeString, $matches)) {
-            $this->_type = $matches[1];
+            $this->type = $matches[1];
             $values = explode("','", $matches[2]);
             $this->_options = array_combine($values, $values);
         } else {
-            $this->_type = $typeString;
+            $this->type = $typeString;
         }
     }
 
     public function __toString()
     {
-        $pk = ($this->_isPK) ? ' PK' : '';
-        $auto = ($this->_isAutoIncrement) ? ' AI' : '';
-        if ($this->_references) {
-            $ref = ' References ' . $this->_references . '.';
+        $pk = ($this->isPrimaryKey) ? ' PK' : '';
+        $auto = ($this->isAutoIncrement) ? ' AI' : '';
+        if ($this->references) {
+            $ref = ' References ' . $this->references . '.';
         } else {
             $ref = '';
         }
-        $size = ($this->_size > 0) ? "($this->_size)" : '';
-        return $this->_name . ' ' . strtoupper($this->_type) . $size . $pk . $auto . $ref;
+        $size = ($this->size > 0) ? "($this->size)" : '';
+        return $this->name . ' ' . strtoupper($this->type) . $size . $pk . $auto . $ref;
     }
 
     /**

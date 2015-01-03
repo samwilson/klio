@@ -12,8 +12,9 @@ class Record extends \Klio\Controller
         );
     }
 
-    public function GET($tableName, $recordId = null)
+    public function get($tableName, $recordId = null)
     {
+        $this->db = $this->getDatabase();
         $view = $this->getView('record');
         $table = $this->db->getTable($tableName);
         $view->table = $table;
@@ -37,7 +38,7 @@ class Record extends \Klio\Controller
         $view->render();
     }
 
-    public function POST($tableName, $recordId = FALSE)
+    public function post($tableName, $recordId = false)
     {
         $this->db = $this->getDatabase();
         $table = $this->db->getTable($tableName);

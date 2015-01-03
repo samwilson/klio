@@ -15,21 +15,21 @@ class Table
     protected $comment = false;
 
     /** @var string The SQL statement used to create this table. */
-    protected $_definingSql;
+    protected $definingSql;
 
     /** @var string The SQL statement most recently saved by $this->getRows() */
     protected $saved_sql;
 
     /** @var string The statement parameters most recently saved by $this->getRows() */
-    protected $saved_parameters;
+    protected $savedParameters;
 
     /**
      * @var array|Table Array of tables referred to by columns in this one.
      */
-    protected $_referenced_tables;
+    protected $referencedTables;
 
     /** @var array Each joined table gets a unique alias, based on this. */
-    protected $alias_count = 1;
+    protected $aliasCount = 1;
 
     /**
      * @var array|Column Array of column names and objects for all of the
@@ -37,14 +37,11 @@ class Table
      */
     protected $columns;
 
-    /** @var Pagination */
-    protected $_pagination;
-
     /** @var array */
-    protected $_filters = array();
+    protected $filters = array();
 
     /** @var array Permitted operators. */
-    protected $_operators = array(
+    protected $operators = array(
         'like' => 'contains',
         'not like' => 'does not contain',
         '=' => 'is',
@@ -61,7 +58,7 @@ class Table
      * @var integer|false The number of currently-filtered rows, or false if no
      * query has been made yet or the filters have been reset.
      */
-    protected $recordCount = FALSE;
+    protected $recordCount = false;
 
     /** @var integer The current page number. */
     protected $currentPageNum = 1;
@@ -87,19 +84,20 @@ class Table
     }
 
     /**
-     * 
+     *
      * @param type $column
      * @param type $operator
      * @param type $value
      * @param boolean $force Whether to transform the value, for FKs.
      */
-    public function addFilter($column, $operator, $value, $force = FALSE)
+    public function addFilter($column, $operator, $value, $force = false)
     {
         $valid_columm = in_array($column, array_keys($this->columns));
-        $valid_operator = in_array($operator, array_keys($this->_operators));
-        $valid_value = (strpos($operator, 'empty') !== false) || (strpos($operator, 'empty') === false && !empty($value));
+        $valid_operator = in_array($operator, array_keys($this->operators));
+        $emptyValueAllowed = (strpos($operator, 'empty') === false && !empty($value));
+        $valid_value = (strpos($operator, 'empty') !== false) || $emptyValueAllowed;
         if ($valid_columm && $valid_operator && $valid_value) {
-            $this->_filters[] = array(
+            $this->filters[] = array(
                 'column' => $column,
                 'operator' => $operator,
                 'value' => trim($value),
@@ -120,9 +118,9 @@ class Table
         $filters = Arr::get($_GET, 'filters', array());
         if (is_array($filters)) {
             foreach ($filters as $filter) {
-                $column = arr::get($filter, 'column', FALSE);
-                $operator = arr::get($filter, 'operator', FALSE);
-                $value = arr::get($filter, 'value', FALSE);
+                $column = arr::get($filter, 'column', false);
+                $operator = arr::get($filter, 'operator', false);
+                $value = arr::get($filter, 'value', false);
                 $this->add_filter($column, $operator, $value);
             }
         }
@@ -137,7 +135,7 @@ class Table
 
     /**
      * Apply the stored filters to the supplied SQL.
-     * 
+     *
      * @param string $sql The SQL to modify
      * @return array Parameter values, in the order of their occurence in $sql
      */
@@ -148,7 +146,7 @@ class Table
         $param_num = 1; // Incrementing parameter suffix, to permit duplicate columns.
         $where_clause = '';
         $join_clause = '';
-        foreach ($this->_filters as $filter) {
+        foreach ($this->filters as $filter) {
             $param_name = $filter['column'] . $param_num;
 
             // FOREIGN KEYS
@@ -161,27 +159,21 @@ class Table
 
             // LIKE or NOT LIKE
             if ($filter['operator'] == 'like' || $filter['operator'] == 'not like') {
-                $where_clause .= ' AND CONVERT(' . $filter['column'] . ', CHAR) ' . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
+                $where_clause .= ' AND CONVERT(' . $filter['column'] . ', CHAR) '
+                        . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = '%' . $filter['value'] . '%';
-            }
-
-            // Equals or does-not-equal
+            } // Equals or does-not-equal
             elseif ($filter['operator'] == '=' || $filter['operator'] == '!=') {
-                $where_clause .= ' AND ' . $filter['column'] . ' ' . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
+                $where_clause .= ' AND ' . $filter['column'] . ' '
+                        . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = $filter['value'];
-            }
-
-            // IS EMPTY
+            } // IS EMPTY
             elseif ($filter['operator'] == 'empty') {
                 $where_clause .= ' AND (' . $filter['column'] . ' IS NULL OR ' . $filter['column'] . ' = "")';
-            }
-
-            // IS NOT EMPTY
+            } // IS NOT EMPTY
             elseif ($filter['operator'] == 'not empty') {
                 $where_clause .= ' AND (' . $filter['column'] . ' IS NOT NULL AND ' . $filter['column'] . ' != "")';
-            }
-
-            // Other operators. They're already validated in $this->addFilter()
+            } // Other operators. They're already validated in $this->addFilter()
             else {
                 $where_clause .= ' AND (' . $filter['column'] . ' ' . $filter['operator'] . ' :' . $param_name . ')';
                 $params[$param_name] = $filter['value'];
@@ -235,7 +227,7 @@ class Table
      * against that column's foreign values. If the column is not a foreign key,
      * the alias will just be the qualified column name, and the join clause will
      * be the empty string.
-     * 
+     *
      * @param \Klio\DB\Column $column
      * @return array Array with 'join_clause' and 'column_alias' keys
      */
@@ -246,22 +238,22 @@ class Table
         if ($column->isForeignKey()) {
             $fk1_table = $column->getReferencedTable();
             $fk1_title_column = $fk1_table->getTitleColumn();
-            $join_clause .= ' LEFT OUTER JOIN `' . $fk1_table->getName() . '` AS f' . $this->alias_count
+            $join_clause .= ' LEFT OUTER JOIN `' . $fk1_table->getName() . '` AS f' . $this->aliasCount
                     . ' ON (`' . $this->getName() . '`.`' . $column->getName() . '` '
-                    . ' = `f' . $this->alias_count . '`.`' . $fk1_table->getPkColumn()->getName() . '`)';
-            $column_alias = "f$this->alias_count." . $fk1_title_column->getName();
+                    . ' = `f' . $this->aliasCount . '`.`' . $fk1_table->getPkColumn()->getName() . '`)';
+            $column_alias = "f$this->aliasCount." . $fk1_title_column->getName();
             $this->joined_tables[] = $column_alias;
             // FK is also an FK?
             if ($fk1_title_column->isForeignKey()) {
                 $fk2_table = $fk1_title_column->getReferencedTable();
                 $fk2_title_column = $fk2_table->getTitleColumn();
-                $join_clause .= ' LEFT OUTER JOIN `' . $fk2_table->getName() . '` AS ff' . $this->alias_count
-                        . ' ON (f' . $this->alias_count . '.`' . $fk1_title_column->getName() . '` '
-                        . ' = ff' . $this->alias_count . '.`' . $fk1_table->getPkColumn()->getName() . '`)';
-                $column_alias = "ff$this->alias_count." . $fk2_title_column->getName();
+                $join_clause .= ' LEFT OUTER JOIN `' . $fk2_table->getName() . '` AS ff' . $this->aliasCount
+                        . ' ON (f' . $this->aliasCount . '.`' . $fk1_title_column->getName() . '` '
+                        . ' = ff' . $this->aliasCount . '.`' . $fk1_table->getPkColumn()->getName() . '`)';
+                $column_alias = "ff$this->aliasCount." . $fk2_title_column->getName();
                 $this->joined_tables[] = $column_alias;
             }
-            $this->alias_count++;
+            $this->aliasCount++;
         }
         return array('join_clause' => $join_clause, 'column_alias' => $column_alias);
     }
@@ -307,7 +299,7 @@ class Table
         //$this->database->setFetchMode(\PDO::FETCH_OBJ);
         if ($save_sql) {
             $this->saved_sql = $sql;
-            $this->saved_parameters = $params;
+            $this->savedParameters = $params;
         }
         return $rows;
     }
@@ -326,7 +318,7 @@ class Table
     {
         return array(
             'sql' => $this->saved_sql,
-            'parameters' => $this->saved_parameters
+            'parameters' => $this->savedParameters
         );
     }
 
@@ -373,7 +365,7 @@ class Table
     /**
      * Get this table's title. This is the title-cased name, if not otherwise
      * defined.
-     * 
+     *
      * @return string The title
      */
     public function getTitle()
@@ -388,7 +380,7 @@ class Table
      */
     public function getOperators()
     {
-        return $this->_operators;
+        return $this->operators;
     }
 
     public function getPageCount()
@@ -398,7 +390,7 @@ class Table
 
     /**
      * Get or set the current page.
-     * 
+     *
      * @param integer $page
      * @return integer Current page
      */
@@ -469,8 +461,9 @@ class Table
         if (DIRECTORY_SEPARATOR == '\\') {
             $filename = str_replace('\\', '/', $filename);
         }
-        if (file_exists($filename))
+        if (file_exists($filename)) {
             unlink($filename);
+        }
         $sql .= " INTO OUTFILE '$filename' "
                 . ' FIELDS TERMINATED BY ","'
                 . ' ENCLOSED BY \'"\''
@@ -556,15 +549,16 @@ class Table
      * Get the first unique-keyed column, or if there is no unique non-ID column
      * then use the second column (because this is often a good thing to do).
      * Unless there's only one column; then, just use that.
-     * 
+     *
      * @return Column
      */
     public function getTitleColumn()
     {
         // Try to get the first non-PK unique key
         foreach ($this->getColumns() as $column) {
-            if ($column->isUniqueKey() && !$column->isPrimaryKey())
+            if ($column->isUniqueKey() && !$column->isPrimaryKey()) {
                 return $column;
+            }
         }
         // But if that fails, just use the second (or the first) column.
         $columnIndices = array_keys($this->columns);
@@ -585,7 +579,7 @@ class Table
      */
     public function getDefiningSql()
     {
-        if (!isset($this->_definingSql)) {
+        if (!isset($this->definingSql)) {
             $defining_sql = $this->database->query("SHOW CREATE TABLE `$this->name`");
             //exit(var_dump($defining_sql));
             if ($defining_sql->columnCount() > 0) {
@@ -601,14 +595,14 @@ class Table
             } else {
                 throw new Exception('Table not found: ' . $this->name);
             }
-            $this->_definingSql = $defining_sql;
+            $this->definingSql = $defining_sql;
         }
-        return $this->_definingSql;
+        return $this->definingSql;
     }
 
     /**
      * Get this table's Primary Key column.
-     * 
+     *
      * @return Column The PK column.
      */
     public function getPkColumn()
@@ -618,7 +612,7 @@ class Table
                 return $column;
             }
         }
-        return FALSE;
+        return false;
     }
 
     /**
@@ -630,17 +624,17 @@ class Table
      */
     public function getReferencedTables()
     {
-        if (!isset($this->_referenced_tables)) {
+        if (!isset($this->referencedTables)) {
             $definingSql = $this->getDefiningSql();
             $foreignKeyPattern = '|FOREIGN KEY \(`(.*?)`\) REFERENCES `(.*?)`|';
             preg_match_all($foreignKeyPattern, $definingSql, $matches);
             if (isset($matches[1]) && count($matches[1]) > 0) {
-                $this->_referenced_tables = array_combine($matches[1], $matches[2]);
+                $this->referencedTables = array_combine($matches[1], $matches[2]);
             } else {
-                $this->_referenced_tables = array();
+                $this->referencedTables = array();
             }
         }
-        return $this->_referenced_tables;
+        return $this->referencedTables;
     }
 
     /**
@@ -664,7 +658,7 @@ class Table
 
     public function getFilters()
     {
-        return $this->_filters;
+        return $this->filters;
     }
 
     /**
@@ -687,10 +681,10 @@ class Table
     {
         foreach ($this->getColumns() as $column) {
             if ($column->can($perm)) {
-                return TRUE;
+                return true;
             }
         }
-        return FALSE;
+        return false;
     }
 
     /**
@@ -770,8 +764,8 @@ class Table
      */
     public function resetFilters()
     {
-        $this->_filters = array();
-        $this->recordCount = FALSE;
+        $this->filters = array();
+        $this->recordCount = false;
     }
 
     public function deleteRecord($primaryKeyValue)
@@ -790,7 +784,7 @@ class Table
      * @param array  $data  The data to insert; if 'id' is set, update.
      * @return int          The ID of the updated or inserted row.
      */
-    public function saveRecord($data, $primaryKeyValue = NULL)
+    public function saveRecord($data, $primaryKeyValue = null)
     {
 
         $columns = $this->getColumns();
@@ -815,7 +809,6 @@ class Table
          * Go through all data and clean it up before saving.
          */
         foreach ($data as $field => $value) {
-
             // Make sure this column exists in the DB.
             if (!isset($columns[$field])) {
                 unset($data[$field]);
@@ -828,36 +821,28 @@ class Table
              * Booleans
              */
             if ($column->getType() == 'int' && $column->getSize() == 1) {
-                if (($value == NULL || $value == '') && !$column->isRequired()) {
-                    $data[$field] = NULL;
+                if (($value == null || $value == '') && !$column->isRequired()) {
+                    $data[$field] = null;
                 } elseif ($value === '0' || $value === 0 || strcasecmp($value, 'false') === 0 || strcasecmp($value, 'off') === 0 || strcasecmp($value, 'no') === 0) {
                     $data[$field] = 0;
                 } else {
                     $data[$field] = 1;
                 }
-            }
-
-            /*
+            } /*
              * Nullable empty fields should be NULL.
              */ elseif (!$column->isRequired() && empty($value)) {
-                $data[$field] = NULL;
-            }
-
-            /*
+                $data[$field] = null;
+            } /*
              * Foreign keys
              */ elseif ($column->isForeignKey() && ($value <= 0 || $value == '')) {
-                $data[$field] = NULL;
-            }
-
-            /*
+                $data[$field] = null;
+            } /*
              * Numbers
              */ elseif (!is_numeric($value) && (
                     substr($column->getType(), 0, 3) == 'int' || substr($column->getType(), 0, 7) == 'decimal' || substr($column->getType(), 0, 5) == 'float')
             ) {
-                $data[$field] = NULL; // Stops empty strings being turned into 0s.
-            }
-
-            /*
+                $data[$field] = null; // Stops empty strings being turned into 0s.
+            } /*
              * Dates & times
              */ elseif (($column->getType() == 'date' || $column->getType() == 'datetime' || $column->getType() == 'time') && $value == '') {
                 $data[$field] = null;
@@ -879,8 +864,7 @@ class Table
             $data['primaryKeyValue'] = $primaryKeyValue;
             $this->database->query($sql, $data);
             $newPkValue = $data[$primaryKeyName];
-        }
-        // Or insert?
+        } // Or insert?
         else {
             // Prevent PK from being empty.
             if (empty($data[$primaryKeyName])) {
