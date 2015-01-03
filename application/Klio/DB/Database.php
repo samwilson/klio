@@ -19,6 +19,9 @@ class Database
 
     public function __construct($test = FALSE)
     {
+        if (self::$pdo) {
+            return;
+        }
         // Try to find the config file.
         $dirs = array(
             dirname(__DIR__ . '/../..'),
@@ -42,7 +45,6 @@ class Database
         self::$pdo = new \PDO($dsn, $database_config['username'], $database_config['password'], $attr);
         self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->setFetchMode(\PDO::FETCH_OBJ);
-        return true;
     }
 
     public function install()
