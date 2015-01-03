@@ -3,7 +3,8 @@ php:
   - 5.5
   - 5.4
   - hhvm
-install:
-  - composer install
 before_script:
   - mysql -e 'create database klio_test;'
+install:
+  - composer install
+  - echo "<?php $database_config = array('database'=>'klio','username'=>'root','password'=>'');' >> $TRAVIS_BUILD_DIR/config.php
