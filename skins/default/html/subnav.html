@@ -1,16 +1,20 @@
 <dl class="sub-nav">
-    <!--dt>This table:</dt-->
+    <dt>Actions:</dt>
 
     <dd class="{%if active=='table'%}active{%endif%}">
         <a href="{{baseurl}}/table/{{table.name}}">Search</a>
     </dd>
 
-    <dd class="{%if active=='record'%}active{%endif%}">
-        {% if record %}
-        <a href="{{baseurl}}/record/{{table.name}}/{{record.id}}">Edit</a>
-        {% else %}
+    <dd class="{%if active=='record' and not record.primaryKey %}active{%endif%}">
         <a href="{{baseurl}}/record/{{table.name}}">Create</a>
+    </dd>
+
+    <dd class="{% if record.primaryKey %}active{% endif %}">
+        <a
+        {% if record %}
+        href="{{baseurl}}/record/{{table.name}}/{{record.primaryKey}}"
         {% endif %}
+        >Edit</a>
     </dd>
 
     <!--

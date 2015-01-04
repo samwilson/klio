@@ -40,6 +40,9 @@ class Column
     /** @var boolean Whether or not this column is auto-incrementing. */
     private $isAutoIncrement = false;
 
+    /** @var boolean Whether NULL values are allowed for this column. */
+    private $isNull;
+
     /**
      * @var string A comma-separated list of the privileges that the database
      * user has for this column.
@@ -91,9 +94,7 @@ class Column
         $this->collation = $info->Collation;
 
         // NULL?
-        if ($info->Null == 'NO') {
-            $this->required = true;
-        }
+        $this->isNull = ($info->Null == 'YES');
 
         // Is this a foreign key?
         if (in_array($this->name, $table->getForeignKeyNames())) {
@@ -252,6 +253,25 @@ class Column
     public function isAutoIncrement()
     {
         return $this->isAutoIncrement;
+    }
+
+    /**
+     * Whether or not this column is allowed to have NULL values.
+     * @return boolean
+     */
+    public function isNull()
+    {
+        return $this->isNull;
+    }
+
+    /**
+     * Only NOT NULL text fields are allowed to have empty strings.
+     * @return boolean
+     */
+    public function allowsEmptyString()
+    {
+        $textTypes = array('text', 'varchar', 'char');
+        return $this->isNull && in_array($this->getType(), $textTypes);
     }
 
     /**

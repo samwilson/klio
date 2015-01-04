@@ -492,7 +492,7 @@ class Table
     /**
      * Get a list of this table's columns.
      *
-     * @return array|\Klio\DB\Column This table's columns.
+     * @return array|Column This table's columns.
      */
     public function getColumns()
     {
@@ -814,14 +814,10 @@ class Table
                 unset($data[$field]);
                 continue;
             }
-
             $column = $columns[$field];
 
-
+            // Boolean values.
             if ($column->getType() == 'int' && $column->getSize() == 1) {
-                /*
-                 * Booleans
-                 */
                 $zeroValues = array(0, '0', 'false', 'FALSE', 'off', 'OFF', 'no', 'NO');
                 if (($value == null || $value == '') && !$column->isRequired()) {
                     $data[$field] = null;
@@ -830,25 +826,10 @@ class Table
                 } else {
                     $data[$field] = 1;
                 }
-            } elseif (!$column->isRequired() && empty($value)) {
-                /*
-                 * Nullable empty fields should be NULL.
-                 */
-                $data[$field] = null;
-            } elseif ($column->isForeignKey() && ($value <= 0 || $value == '')) {
-                /*
-                 * Foreign keys
-                 */
-                $data[$field] = null;
-            } elseif (!is_numeric($value) && $column->isNumeric()) {
-                /*
-                 * Numbers
-                 */
-                $data[$field] = null; // Stops empty strings being turned into 0s.
-            } elseif (($column->getType() == 'date' || $column->getType() == 'datetime' || $column->getType() == 'time') && $value == '') {
-                /*
-                 * Dates & times
-                 */
+            }
+
+            // Empty strings.
+            if (!$column->allowsEmptyString() && $value === '' && $column->isNull()) {
                 $data[$field] = null;
             }
         }

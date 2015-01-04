@@ -1,37 +1,16 @@
 <?php
 
-class Test extends PHPUnit_Framework_TestCase
+namespace Klio\Tests;
+
+class InstallAndSettingsTest extends KlioTestCase
 {
-
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->cleanDb();
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-        $this->cleanDb();
-    }
-
-    /**
-     * Drop all tables.
-     */
-    protected function cleanDb()
-    {
-        $db = new Klio\DB\Database(TRUE);
-        foreach ($db->getTableNames() as $tbl) {
-            $db->query("DROP TABLE $tbl");
-        }
-    }
 
     /**
      * @test
      */
     public function install()
     {
-        $db = new Klio\DB\Database(TRUE);
+        $db = new \Klio\DB\Database(true);
         $this->assertEmpty($db->getTableNames());
         $db->install();
         $this->assertContains('settings', $db->getTableNames(), 'settings table not found');
@@ -42,7 +21,7 @@ class Test extends PHPUnit_Framework_TestCase
      */
     public function settings()
     {
-        $db = new Klio\DB\Database(TRUE);
+        $db = new \Klio\DB\Database(true);
         $db->install();
         $this->assertEquals('The Default', \Klio\Settings::get('does_not_exist', 'The Default'));
         \Klio\Settings::save('new_setting', 'New Value');

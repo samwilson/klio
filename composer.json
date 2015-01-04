@@ -2,7 +2,8 @@
     "name": "samwilson/klio",
     "autoload": {
         "psr-0": {
-            "Klio": "application"
+            "Klio": "application",
+            "": "tests"
         }
     },
     "require": {
