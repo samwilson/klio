@@ -29,9 +29,16 @@
                     {{ attribute(record, column.name~'FKTITLE') }}
                 </a>
 
+                {% elseif column.isBoolean %}
+                {% if attribute(record, column.name) == 1 %}
+                Yes
+                {% elseif attribute(record, column.name) == null %}
+                
                 {% else %}
-                <!--{{ row }}<br />
-                [{{row[column.name]}}]<br />-->
+                No
+                {% endif %}
+
+                {% else %}
                 {{ attribute(record, column.name) }}
 
                 {% endif %}

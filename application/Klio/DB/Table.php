@@ -817,9 +817,9 @@ class Table
             $column = $columns[$field];
 
             // Boolean values.
-            if ($column->getType() == 'int' && $column->getSize() == 1) {
-                $zeroValues = array(0, '0', 'false', 'FALSE', 'off', 'OFF', 'no', 'NO');
-                if (($value == null || $value == '') && !$column->isRequired()) {
+            if ($column->isBoolean()) {
+                $zeroValues = array(0, '0', false, 'false', 'FALSE', 'off', 'OFF', 'no', 'NO');
+                if (($value === null || $value === '') && !$column->isRequired()) {
                     $data[$field] = null;
                 } elseif (in_array($value, $zeroValues, true)) {
                     $data[$field] = 0;
@@ -848,7 +848,7 @@ class Table
                     . " WHERE `$primaryKeyName` = :primaryKeyValue";
             $data['primaryKeyValue'] = $primaryKeyValue;
             $this->database->query($sql, $data);
-            $newPkValue = $data[$primaryKeyName];
+            $newPkValue = \Klio\Arr::get($data, $primaryKeyName, $primaryKeyValue);
         } // Or insert?
         else {
             // Prevent PK from being empty.

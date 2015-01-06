@@ -31,6 +31,18 @@
                 {% endfor %}
             </select>
 
+            {% elseif column.isBoolean %}
+            {{attribute(record, column.name)}}
+            <input type="radio" name="{{column.name}}" id="{{column.name}}-yes"
+                   value="1" {% if attribute(record, column.name)==1 %}checked{% endif %} />
+            <label for="{{column.name}}-yes">Yes</label>
+            <input type="radio" name="{{column.name}}" id="{{column.name}}-no"
+                   value="0" {% if attribute(record, column.name)==0 %}checked{% endif %} />
+            <label for="{{column.name}}-no">No</label>
+            <input type="radio" name="{{column.name}}" id="{{column.name}}-null"
+                   value="" {% if attribute(record, column.name)==null %}checked{% endif %} />
+            <label for="{{column.name}}-null" title="Not Applicable">N/A</label>
+
             {% elseif column.type=='text' %}
             <textarea name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
                       {% if column.isRequired %}required{% endif %} rows="5"
