@@ -45,6 +45,17 @@ class Record
                 return $referencedTable->getRecord($this->data[$name])->$fkTitleColName();
             }
         }
+        // Booleans
+        if ($this->table->getColumn($name)->isBoolean()) {
+            // Numbers are fetched from the DB as strings.
+            if ($this->data[$name] === '1') {
+                return true;
+            } elseif ($this->data[$name] === '0') {
+                return false;
+            } else {
+                return null;
+            }
+        }
         // Standard column values.
         if (isset($this->data[$name])) {
             return $this->data[$name];

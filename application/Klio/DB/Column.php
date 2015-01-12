@@ -275,6 +275,19 @@ class Column
     }
 
     /**
+     * Is this a boolean field?
+     *
+     * This method deals with the silliness that is MySQL's boolean datatype. Or, rather, it will do when it's finished.
+     * For now, it just reports true when this is a TINYINT(1) column.
+     *
+     * @return boolean
+     */
+    public function isBoolean()
+    {
+        return $this->getType() == 'tinyint' && $this->getSize() === 1;
+    }
+
+    /**
      * Whether or not this column is an integer, float, or decimal column.
      */
     public function isNumeric()
@@ -347,13 +360,13 @@ class Column
         $varchar_pattern = '/^((?:var)?char)\((\d+)\)/';
         $decimal_pattern = '/^decimal\((\d+),(\d+)\)/';
         $float_pattern = '/^float\((\d+),(\d+)\)/';
-        $integer_pattern = '/^((?:big|medium|small|tiny)?int)\(?(\d+)\)?/';
-        $integer_pattern = '/.*?(int|year)\(+(\d+)\)/';
+        $integer_pattern = '/^((?:big|medium|small|tiny)?int|year)\(?(\d+)\)?/';
+        //$integer_pattern = '/.*?(int|year)\(+(\d+)\)/';
         $enum_pattern = '/^(enum|set)\(\'(.*?)\'\)/';
 
         if (preg_match($varchar_pattern, $typeString, $matches)) {
             $this->type = $matches[1];
-            $this->size = $matches[2];
+            $this->size = (int) $matches[2];
         } elseif (preg_match($decimal_pattern, $typeString, $matches)) {
             $this->type = 'decimal';
             //$colData['precision'] = $matches[1];
@@ -364,7 +377,7 @@ class Column
             //$colData['scale'] = $matches[2];
         } elseif (preg_match($integer_pattern, $typeString, $matches)) {
             $this->type = $matches[1];
-            $this->size = $matches[2];
+            $this->size = (int) $matches[2];
         } elseif (preg_match($enum_pattern, $typeString, $matches)) {
             $this->type = $matches[1];
             $values = explode("','", $matches[2]);
