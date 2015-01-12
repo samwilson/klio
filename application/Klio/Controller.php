@@ -19,23 +19,12 @@ class Controller
     }
 
     /**
-     * Get the database, or display an error and die.
+     * Get the database.
      * @return \Klio\DB\Database The database object
      */
     public function getDatabase()
     {
-        try {
-            return new DB\Database();
-        } catch (\PDOException $e) {
-            $installUrl = $this->getBaseUrl() . '/install';
-            $errorView = $this->getView('error');
-            $errorView->title = 'Error';
-            $errorView->message = 'Unable to get the database.<br />'
-                    . '<a href="' . $installUrl . '" class="button radius">Install or upgrade</a>';
-            $errorView->baseurl = $this->getBaseUrl();
-            $errorView->render();
-            exit(1);
-        }
+        return new DB\Database();
     }
 
     public function getBaseDir()

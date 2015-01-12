@@ -4,7 +4,7 @@
 
 {% include "subnav.html" with {'active': 'table'} %}
 
-<p>{{row_count}} record{% if row_count > 1 %}s{% endif %}</p>
+<p>{{row_count}} record{% if row_count != 1 %}s{% endif %}</p>
 
 {% include "pagination.html" %}
 

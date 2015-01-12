@@ -37,6 +37,9 @@ class Database
                 break;
             }
         }
+        if (!isset($database_config)) {
+            throw new Exception("Database configuration not found.");
+        }
         // Connect to the database.
         $host = \Klio\Arr::get($database_config, 'hostname', 'localhost');
         $dbname = $database_config['database'] . ($test ? '_test' : '');
@@ -131,7 +134,7 @@ class Database
             }
             $result = $stmt->execute();
             if (!$result) {
-                throw new \PDOException('Unable to execute: ' . $sql);
+                throw new \PDOException('Unable to execute SQL: <code>' . $sql . '</code>');
             } else {
                 //echo '<p>Executed: '.$sql.'<br />with '.  print_r($params, true).'</p>';
             }
@@ -144,7 +147,7 @@ class Database
                     $stmt = self::$pdo->query($sql);
                 }
             } catch (\PDOException $e) {
-                throw new \Exception($e->getMessage() . 'Unable to execute: ' . $sql);
+                throw new \Exception($e->getMessage() . ' -- Unable to execute: <code>' . $sql . '</code>');
             }
         }
 

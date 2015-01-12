@@ -68,7 +68,8 @@ class App
                         $found = true;
                         $method = strtolower($_SERVER['REQUEST_METHOD']);
                         array_shift($matches);
-                        call_user_func_array(array($controller, $method), $matches);
+                        //call_user_func_array(array($controller, $method), $matches);
+                        $this->callControllerMethod($controller, $method, $matches);
                         exit(0);
                     }
                 }
@@ -79,6 +80,21 @@ class App
             header('HTTP/1.1 404 Not Found');
             header('Content-Type: text/plain');
             echo "Resource not found: $uri";
+            exit(1);
+        }
+    }
+    
+    protected function callControllerMethod($controller, $method, $params) {
+        try {
+            call_user_func_array(array($controller, $method), $params);
+        } catch (\Exception $e) {
+            $installUrl = $controller->getBaseUrl() . '/install';
+            $errorView = $controller->getView('error');
+            $errorView->title = 'Error';
+            $errorView->message = $e->getMessage().'<br />'
+                    . '<a href="' . $installUrl . '" class="button radius">Install or upgrade</a>';
+            $errorView->baseurl = $controller->getBaseUrl();
+            $errorView->render();
             exit(1);
         }
     }
