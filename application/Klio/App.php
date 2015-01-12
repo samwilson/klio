@@ -83,16 +83,17 @@ class App
             exit(1);
         }
     }
-    
-    protected function callControllerMethod($controller, $method, $params) {
+
+    protected function callControllerMethod($controller, $method, $params)
+    {
         try {
             call_user_func_array(array($controller, $method), $params);
         } catch (\Exception $e) {
             $installUrl = $controller->getBaseUrl() . '/install';
             $errorView = $controller->getView('error');
             $errorView->title = 'Error';
-            $errorView->message = $e->getMessage().'<br />'
-                    . '<a href="' . $installUrl . '" class="button radius">Install or upgrade</a>';
+            $errorView->message = '<p>'.$e->getMessage().'</p>'
+                    . '<p><a href="' . $installUrl . '" class="button radius">Install or upgrade</a></p>';
             $errorView->baseurl = $controller->getBaseUrl();
             $errorView->render();
             exit(1);
