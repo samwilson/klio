@@ -30,12 +30,12 @@
                 </a>
 
                 {% elseif column.isBoolean %}
-                {% if attribute(record, column.name) == 1 %}
+                {% if attribute(record, column.name) is sameas(true) %}
                 Yes
-                {% elseif attribute(record, column.name) == null %}
-                
-                {% else %}
+                {% elseif attribute(record, column.name) is sameas(false) %}
                 No
+                {% else %}
+                
                 {% endif %}
 
                 {% else %}

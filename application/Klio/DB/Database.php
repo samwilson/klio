@@ -125,7 +125,17 @@ class Database
         if (is_array($params) && count($params) > 0) {
             $stmt = self::$pdo->prepare($sql);
             foreach ($params as $placeholder => $value) {
-                $stmt->bindValue($placeholder, $value);
+                if (is_bool($value)) {
+                    $type = \PDO::PARAM_BOOL;
+                } elseif (is_null($value)) {
+                    $type = \PDO::PARAM_NULL;
+                } elseif (is_int($value)) {
+                    $type = \PDO::PARAM_INT;
+                } else {
+                    $type = \PDO::PARAM_STR;
+                }
+                //echo '<li>';var_dump($value, $type);
+                $stmt->bindValue($placeholder, $value, $type);
             }
             if ($class) {
                 $stmt->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $class, $classArgs);
@@ -134,7 +144,7 @@ class Database
             }
             $result = $stmt->execute();
             if (!$result) {
-                throw new \PDOException('Unable to execute SQL: <code>' . $sql . '</code>');
+                throw new \PDOException('Unable to execute parameterised SQL: <code>' . $sql . '</code>');
             } else {
                 //echo '<p>Executed: '.$sql.'<br />with '.  print_r($params, true).'</p>';
             }
@@ -147,7 +157,7 @@ class Database
                     $stmt = self::$pdo->query($sql);
                 }
             } catch (\PDOException $e) {
-                throw new \Exception($e->getMessage() . ' -- Unable to execute: <code>' . $sql . '</code>');
+                throw new \Exception($e->getMessage() . ' -- Unable to execute SQL: <code>' . $sql . '</code>');
             }
         }
 

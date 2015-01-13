@@ -16,7 +16,7 @@ class SchemaTest extends KlioTestCase
                 . ' id INT(10) PRIMARY KEY,'
                 . ' title VARCHAR(100) NOT NULL,'
                 . ' description TEXT NULL,'
-                . ' active BOOLEAN NULL DEFAULT 1,'
+                . ' active BOOLEAN NULL DEFAULT TRUE,'
                 . ' a_date DATE NULL'
                 . ')';
         $this->db->query($sql);
@@ -48,15 +48,36 @@ class SchemaTest extends KlioTestCase
 
         // Column type.
         $this->assertTrue($testTable->getColumn('active')->isBoolean());
+        $this->assertTrue($testTable->getColumn('active')->isNull());
 
         // Column values.
+        // True.
         $testTable->saveRecord(array('id' => 1, 'active' => true));
-        $this->assertTrue($testTable->getRecord(1)->active());
+        $this->assertTrue($testTable->getRecord(1)->active(), "Can save 'true'.");
+        // False.
         $testTable->saveRecord(array('active' => false), 1);
-        $this->assertFalse($testTable->getRecord(1)->active());
+        $this->assertFalse($testTable->getRecord(1)->active(), "Can save 'false'.");
+        // Null.
         $testTable->saveRecord(array('active' => null), 1);
-        $this->assertNull($testTable->getRecord(1)->active());
+        $this->assertNull($testTable->getRecord(1)->active(), "Can save 'null'.");
+        // Back to false again.
         $testTable->saveRecord(array('active' => false), 1);
         $this->assertFalse($testTable->getRecord(1)->active());
+    }
+
+    /**
+     * @test
+     */
+    public function dates()
+    {
+        $testTable = $this->db->getTable('test_table');
+
+        // Column type.
+        $this->assertEquals("date", $testTable->getColumn('a_date')->getType());
+        $this->assertTrue($testTable->getColumn('a_date')->isNull());
+
+        // Values.
+        $testTable->saveRecord(array('id' => 1, 'a_date' => '2015-01-12'));
+        $this->assertEquals('2015-01-12', $testTable->getRecord(1)->a_date());
     }
 }

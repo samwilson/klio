@@ -789,12 +789,12 @@ class Table
             // Boolean values.
             if ($column->isBoolean()) {
                 $zeroValues = array(0, '0', false, 'false', 'FALSE', 'off', 'OFF', 'no', 'NO');
-                if (($value === null || $value === '') && !$column->isRequired()) {
+                if (($value === null || $value === '') && $column->isNull()) {
                     $data[$field] = null;
                 } elseif (in_array($value, $zeroValues, true)) {
-                    $data[$field] = 0;
+                    $data[$field] = false;
                 } else {
-                    $data[$field] = 1;
+                    $data[$field] = true;
                 }
             }
 
@@ -803,16 +803,23 @@ class Table
                 $data[$field] = null;
             }
         }
+        //echo '<pre>'; var_dump($data); exit();
 
         // Update?
         $primaryKeyName = $this->getPkColumn()->getName();
         if ($primaryKeyValue) {
             $pairs = array();
             foreach ($data as $col => $val) {
-                //if ($col == $primaryKeyName) {
-                //    continue;
+//                var_dump($val);
+//                if (is_bool($val)) {
+//                    $pairs[] = "`$col` = ".(($val) ? 'TRUE' : 'FALSE');
+//                    unset($data[$col]);
+//                } elseif (is_null($val)) {
+//                    $pairs[] = "`$col` = NULL";
+//                    unset($data[$col]);
+//                } else {
+                    $pairs[] = "`$col` = :$col";
                 //}
-                $pairs[] = "`$col` = :$col";
             }
             $sql = "UPDATE " . $this->getName() . " SET " . join(', ', $pairs)
                     . " WHERE `$primaryKeyName` = :primaryKeyValue";

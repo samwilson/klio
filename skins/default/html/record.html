@@ -32,16 +32,18 @@
             </select>
 
             {% elseif column.isBoolean %}
-            {{attribute(record, column.name)}}
+            
             <input type="radio" name="{{column.name}}" id="{{column.name}}-yes"
-                   value="1" {% if attribute(record, column.name)==1 %}checked{% endif %} />
+                   value="1" {% if attribute(record, column.name) is sameas(true) %}checked{% endif %} />
             <label for="{{column.name}}-yes">Yes</label>
             <input type="radio" name="{{column.name}}" id="{{column.name}}-no"
-                   value="0" {% if attribute(record, column.name)==0 %}checked{% endif %} />
+                   value="0" {% if attribute(record, column.name) is sameas(false) %}checked{% endif %} />
             <label for="{{column.name}}-no">No</label>
+            {% if column.isNull %}
             <input type="radio" name="{{column.name}}" id="{{column.name}}-null"
-                   value="" {% if attribute(record, column.name)==null %}checked{% endif %} />
+                   value="" {% if attribute(record, column.name) is null %}checked{% endif %} />
             <label for="{{column.name}}-null" title="Not Applicable">N/A</label>
+            {% endif %}
 
             {% elseif column.type=='text' %}
             <textarea name="{{column.name}}" id="{{column.name}}" aria-describedby="{{column.name}}-help"
@@ -78,13 +80,15 @@
         <div class="small-2 columns">
         </div>
         <div class="small-10 columns">
-            <label>* An asterisk denotes a required field.</label>
-            <input type="submit" value="Save" class="button success" />
-            <a href="{{baseurl}}/table/{{table.name}}" class="button" title="Return to search">Cancel</a>
-            {% if record %}
-            <input type="hidden" name="primary_key_value" value="{{record.getPrimaryKey}}" />
-            <a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}/delete" class="button alert" title="Delete this record">Delete</a>
-            {% endif %}
+            <p><label>* An asterisk denotes a required field.</label></p>
+            <p>
+                <input type="submit" value="Save" class="button success" />
+                <a href="{{baseurl}}/table/{{table.name}}" class="button" title="Return to search">Cancel</a>
+                {% if record %}
+                <input type="hidden" name="primary_key_value" value="{{record.getPrimaryKey}}" />
+                <a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}/delete" class="button alert" title="Delete this record">Delete</a>
+                {% endif %}
+            </p>
         </div>
     </div>
 
