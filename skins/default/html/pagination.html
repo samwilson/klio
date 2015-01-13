@@ -14,14 +14,18 @@
     </li>
 
     {% for p in 1..table.pageCount %}
-    <li class="{% if table.currentPageNum == p %}current{% endif %}">
-        <a {% if table.currentPageNum != p %}
-            href="{{baseurl}}/table/{{table.name}}/{{p}}"
-            {% endif %}
-            >
-            {{p}}
-        </a>
-    </li>
+        {% if (p < 5) or (p > table.currentPageNum-5 and p < table.currentPageNum+5) or (p>table.pageCount-5) %}
+        <li class="{% if table.currentPageNum == p %}current{% endif %}">
+            <a {% if table.currentPageNum != p %}
+                href="{{baseurl}}/table/{{table.name}}/{{p}}"
+                {% endif %}
+                >
+                {{p}}
+            </a>
+        </li>
+        {% elseif p==6 or p==table.currentPageNum-6 or p==table.currentPageNum+6 or p==table.pageCount-6  %}
+        <li>&hellip;</li>
+        {% endif %}
     {% endfor %}
 
     <li class="arrow

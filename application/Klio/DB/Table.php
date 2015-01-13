@@ -516,36 +516,6 @@ class Table
     }
 
     /**
-     * Get the title text for a given row.  This is the value of the 'title
-     * column' for that row.  If the title column is a foreign key, then the
-     * title of the foreign row is used (this is recursive, to allow FKs to
-     * reference FKs to an arbitrary depth).
-     *
-     * @param integer $id The row ID.
-     * @return string The title of this row.
-     */
-    public function getRowTitle($id)
-    {
-        $row = $this->get_row($id);
-        $title_column = $this->getTitleColumn();
-        // If the title column is  FK, pass the title request through.
-        if ($title_column->isForeignKey() && !empty($row[$title_column->getName()])) {
-            $foreign_title_column = $title_column->getReferencedTable()->getTitleColumn();
-            if ($foreign_title_column->isForeignKey()) {
-                $title_column = $foreign_title_column;
-            }
-            $fk_row_id = $row[$title_column->getName()];
-            return $title_column->getReferencedTable()->getTitle($fk_row_id);
-        }
-        // Otherwise, get the text.
-        if (isset($row[$title_column->getName()])) {
-            return $row[$title_column->getName()];
-        } else {
-            return '[ ' . join(', ', $row) . ' ]'; // This is ridiculous.
-        }
-    }
-
-    /**
      * Get the first unique-keyed column, or if there is no unique non-ID column
      * then use the second column (because this is often a good thing to do).
      * Unless there's only one column; then, just use that.

@@ -5,16 +5,22 @@ namespace Klio;
 class Settings
 {
 
+    protected static $settings = array();
+
     public static function get($name, $default = null)
     {
+        if (isset(self::$settings[$name])) {
+            return self::$settings[$name];
+        }
         try {
             $db = new DB\Database();
             $sql = 'SELECT `value` FROM `settings` WHERE `name` = :name';
             $stmt = $db->query($sql, array(':name' => $name));
             $value = $stmt->fetchColumn();
             if (!$value) {
-                return $default;
+                $value = $default;
             }
+            self::$settings[$name] = $value;
             return $value;
         } catch (\PDOException $e) {
             return $default;
@@ -30,6 +36,7 @@ class Settings
             $sql = 'INSERT INTO `settings` (`name`,`value`) VALUES (:name, :value)';
         }
         $res = $db->query($sql, array(':name' => $name, ':value' => $value));
+        self::$settings[$name] = $value;
     }
 
     public static function siteTitle()

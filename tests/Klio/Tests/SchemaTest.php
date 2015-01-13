@@ -56,5 +56,7 @@ class SchemaTest extends KlioTestCase
         $this->assertFalse($testTable->getRecord(1)->active());
         $testTable->saveRecord(array('active' => null), 1);
         $this->assertNull($testTable->getRecord(1)->active());
+        $testTable->saveRecord(array('active' => false), 1);
+        $this->assertFalse($testTable->getRecord(1)->active());
     }
 }

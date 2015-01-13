@@ -34,15 +34,20 @@ class Record
 
     public function __call($name, $args)
     {
-        //echo "<li>Calling [$name] with ".print_r($args, TRUE);
         // Foreign key 'title' values.
         $useTitle = substr($name, -strlen(self::FKTITLE)) == self::FKTITLE;
         if ($useTitle) {
             $name = substr($name, 0, -strlen(self::FKTITLE));
-            if ($this->table->getColumn($name)->isForeignKey()) {
+            if ($this->table->getColumn($name)->isForeignKey() && !empty($this->data[$name])) {
                 $referencedTable = $this->table->getColumn($name)->getReferencedTable();
-                $fkTitleColName = $referencedTable->getTitleColumn()->getName();
-                return $referencedTable->getRecord($this->data[$name])->$fkTitleColName();
+                $fkRecord = $referencedTable->getRecord($this->data[$name]);
+                $fkTitleCol = $referencedTable->getTitleColumn();
+                $fkTitleColName = $fkTitleCol->getName();
+                if ($fkTitleCol->isForeignKey()) {
+                    // Use title if the FK's title column is also an FK.
+                    $fkTitleColName .= self::FKTITLE;
+                }
+                return $fkRecord->$fkTitleColName();
             }
         }
         // Booleans
