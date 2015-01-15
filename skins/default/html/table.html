@@ -4,6 +4,51 @@
 
 {% include "subnav.html" with {'active': 'table'} %}
 
+<form action="{{baseurl}}/table/{{table.name}}" method="get" class="filters">
+
+    {% for fid,filter in filters %}
+    <div class="filter row">
+        <div class="large-2 columns filter data-filter-num="{{fid}}">
+            <label class="right inline">
+            {% if fid==0 %}Find records where{% else %}and{% endif %}&hellip;
+            </label>
+        </div>
+        <div class="large-3 columns">
+            <select name="filter[{{fid}}][column]">
+                {% for column in table.columns %}
+                <option value="{{column.name}}" {% if column.name==filter.column %}selected{% endif %}>
+                    {{column.title}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="large-2 columns">
+            <select name="filter[{{fid}}][operator]">
+                {% for op,name in operators %}
+                <option value="{{op}}" {% if op==filter.operator %}selected{% endif %}>
+                    {{name}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="large-5 columns">
+            <input type="text" name="filter[{{fid}}][value]" value="{{filter.value}}" />
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="large-2 columns"></div>
+        <div class="large-10 columns submit">
+            <input type="submit" value="Search" class="button success small" />
+            {% if filterCount > 1 %}
+            <a href="{{baseurl}}/table/{{table.name}}?filters=" class="button default small">Clear filters</a>
+            {% endif %}
+        </div>
+    </div>
+
+</form>
+
 <p>{{row_count|number_format}} record{% if row_count != 1 %}s{% endif %}</p>
 
 {% include "pagination.html" %}

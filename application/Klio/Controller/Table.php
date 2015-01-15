@@ -25,6 +25,19 @@ class Table extends \Klio\Controller
         $view->columns = $table->getColumns();
         $view->title = $table->getTitle();
         $view->subtitle = $table->getComment();
+
+        // Filters.
+        $view->operators = $table->getOperators();
+        $table->addFilters(\Klio\Arr::get($_GET, 'filter', array()));
+        $filters = $table->getFilters();
+        $filters[] = array(
+            'column' => $table->getTitleColumn()->getName(),
+            'operator' => 'like',
+            'value' => ''
+        );
+        $view->filters = $filters;
+        $view->filterCount = count($filters);
+
         $view->row_count = $table->countRecords();
         $view->records = $table->getRecords();
         $view->render();
@@ -34,4 +47,5 @@ class Table extends \Klio\Controller
     {
         
     }
+
 }

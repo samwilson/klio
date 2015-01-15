@@ -29,8 +29,19 @@
 
                     <!-- Left Nav Section -->
                     <ul class="left">
-                        {%for table in tables%}
-                        <li><a href="{{baseurl}}/table/{{table.name}}">{{table.title}}</a></li>
+                        {% for group,grouptables in tables %}
+                        <li class="has-dropdown">
+                            <a>{{group}}</a>
+                            <ul class="dropdown">
+                                {% for table in grouptables %}
+                                <li>
+                                    <a href="{{baseurl}}/table/{{table.name}}">
+                                        {{table.title}}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
                         {% endfor %}
                     </ul>
                 </section>
@@ -71,6 +82,7 @@
 
         <script src="{{baseurl}}/skin/js/vendor/jquery.js"></script>
         <script src="{{baseurl}}/skin/js/foundation.min.js"></script>
+        <script src="{{baseurl}}/skin/js/app.js"></script>
         <script>$(document).foundation();</script>
     </body>
 </html>

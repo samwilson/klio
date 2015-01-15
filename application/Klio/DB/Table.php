@@ -84,7 +84,7 @@ class Table
     }
 
     /**
-     *
+     * Add a filter.
      * @param type $column
      * @param type $operator
      * @param type $value
@@ -107,23 +107,21 @@ class Table
     }
 
     /**
-     * Add all of the filters given in $_GET['filters'].  This is used in both
-     * the [index](api/Controller_WebDB#action_index)
-     * and [export](api/Controller_WebDB#action_export) actions.
-     *
-     * @return void
+     * Add multiple filters.
      */
-    public function addGetFilters()
+    public function addFilters($filters)
     {
-        $filters = Arr::get($_GET, 'filters', array());
-        if (is_array($filters)) {
-            foreach ($filters as $filter) {
-                $column = arr::get($filter, 'column', false);
-                $operator = arr::get($filter, 'operator', false);
-                $value = arr::get($filter, 'value', false);
-                $this->add_filter($column, $operator, $value);
-            }
+        foreach ($filters as $filter) {
+            $column = \Klio\Arr::get($filter, 'column', false);
+            $operator = \Klio\Arr::get($filter, 'operator', false);
+            $value = \Klio\Arr::get($filter, 'value', false);
+            $this->addFilter($column, $operator, $value);
         }
+    }
+
+    public function getFilters()
+    {
+        return $this->filters;
     }
 
     protected function getFkJoinClause($table, $alias, $column)
@@ -151,7 +149,7 @@ class Table
 
             // FOREIGN KEYS
             $column = $this->columns[$filter['column']];
-            if ($column->is_foreign_key() && !$filter['force']) {
+            if ($column->isForeignKey() && !$filter['force']) {
                 $join = $this->joinOn($column);
                 $filter['column'] = $join['column_alias'];
                 $join_clause .= $join['join_clause'];
@@ -416,7 +414,7 @@ class Table
     {
         if (!$this->recordCount) {
             $pk = $this->getPkColumn()->getName();
-            $sql = 'SELECT COUNT(`' . $pk . '`) as `count` FROM `' . $this->getName() . '`';
+            $sql = 'SELECT COUNT(`'.$this->getName().'`.`' . $pk . '`) as `count` FROM `' . $this->getName() . '`';
             $params = $this->applyFilters($sql);
             $result = $this->database->query($sql, $params);
             $this->recordCount = $result->fetchColumn();
@@ -624,11 +622,6 @@ class Table
             }
         }
         return $out;
-    }
-
-    public function getFilters()
-    {
-        return $this->filters;
     }
 
     /**

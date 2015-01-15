@@ -53,7 +53,7 @@ class Controller
         $view->title = Settings::siteTitle();
         $view->baseurl = $this->getBaseUrl();
         if ($this->db) {
-            $view->tables = $this->db->getTables();
+            $view->tables = $this->db->getTables(true);
         }
         return $view;
     }

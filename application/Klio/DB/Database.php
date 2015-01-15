@@ -54,37 +54,37 @@ class Database
     {
         if (!$this->getTable('settings')) {
             $this->query(
-                "CREATE TABLE settings ("
-                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                . " name VARCHAR(65) NOT NULL UNIQUE,"
-                . " value TEXT NOT NULL"
-                . ");"
+                    "CREATE TABLE settings ("
+                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                    . " name VARCHAR(65) NOT NULL UNIQUE,"
+                    . " value TEXT NOT NULL"
+                    . ");"
             );
         }
         if (!$this->getTable('changesets')) {
             $this->query(
-                "CREATE TABLE changesets ("
-                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
-                . " date_and_time TIMESTAMP NOT NULL,"
-                . " user_id INT(5) NULL DEFAULT NULL,"
-                . " comments VARCHAR(140) NULL DEFAULT NULL"
-                . ");"
+                    "CREATE TABLE changesets ("
+                    . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
+                    . " date_and_time TIMESTAMP NOT NULL,"
+                    . " user_id INT(5) NULL DEFAULT NULL,"
+                    . " comments VARCHAR(140) NULL DEFAULT NULL"
+                    . ");"
             );
         }
         if (!$this->getTable('changes')) {
             $this->query(
-                "CREATE TABLE changes ("
-                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                . " changeset_id INT(10) NOT NULL,"
-                . " user_id INT(5) NULL DEFAULT NULL,"
-                . " comments VARCHAR(140) NULL DEFAULT NULL"
-                . ");"
+                    "CREATE TABLE changes ("
+                    . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+                    . " changeset_id INT(10) NOT NULL,"
+                    . " user_id INT(5) NULL DEFAULT NULL,"
+                    . " comments VARCHAR(140) NULL DEFAULT NULL"
+                    . ");"
             );
             $this->query(
-                "ALTER TABLE `changes`"
-                . " ADD FOREIGN KEY ( `changeset_id` )"
-                . " REFERENCES `changes` (`id`)"
-                . " ON DELETE CASCADE ON UPDATE CASCADE;"
+                    "ALTER TABLE `changes`"
+                    . " ADD FOREIGN KEY ( `changeset_id` )"
+                    . " REFERENCES `changes` (`id`)"
+                    . " ON DELETE CASCADE ON UPDATE CASCADE;"
             );
         }
         $this->table_names = false;
@@ -180,12 +180,36 @@ class Database
         return $this->table_names;
     }
 
-    public function getTables()
+    public function getTables($grouped = false)
     {
         foreach ($this->getTableNames() as $tableName) {
             $this->getTable($tableName);
         }
-        return $this->tables;
+        if (!$grouped) {
+            return $this->tables;
+        }
+
+        // Group tables together by common prefixes.
+        if (isset($_SESSION['grouped_table_names'])) {
+            $prefixes = $_SESSION['grouped_table_names'];
+        } else {
+            $prefixes = \Klio\Arr::get_prefix_groups(array_keys($this->tables));
+            $_SESSION['grouped_table_names'] = $prefixes;
+        }
+        $groups = array('Miscellaneous' => $this->tables);
+        // Go through each table,
+        foreach (array_keys($this->tables) as $table) {
+            // and each LCP,
+            foreach ($prefixes as $lcp) {
+                // and, if the table name begins with this LCP, add the table
+                // to the LCP group.
+                if (strpos($table, $lcp) === 0) {
+                    $groups[\Klio\Text::titlecase($lcp)][$table] = $this->tables[$table];
+                    unset($groups['Miscellaneous'][$table]);
+                }
+            }
+        }
+        return $groups;
     }
 
     /**
@@ -208,4 +232,5 @@ class Database
         }
         return $this->tables[$name];
     }
+
 }
