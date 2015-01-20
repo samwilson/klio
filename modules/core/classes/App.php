@@ -6,24 +6,41 @@ class App
 {
 
     private $baseUrl;
-
     private $baseDir;
+
+    /** @var Modules */
+    private $modules;
 
     public static function name()
     {
         return 'Klio';
     }
 
+    /**
+     * Get the application's version.
+     *
+     * Conforms to Semantic Versioning guidelines.
+     * @link http://semver.org
+     * @return string
+     */
     public static function version()
     {
-        return '0.2.0';
+        return '0.3.0';
     }
 
     public function __construct($baseDir, $baseUrl)
     {
         $this->setBaseUrl($baseUrl);
-        $this->baseDir = $baseDir;
+        $this->setBaseDir($baseDir);
         session_start();
+        $this->modules = new Modules($this->getBaseDir());
+
+        // Add module paths. A hack, certainly -- but it works.
+        $autoload_functions = spl_autoload_functions();
+        $loader = $autoload_functions[0][0];
+        foreach ($this->modules->getPaths() as $mod => $dir) {
+            $loader->addPsr4('Klio\\', realpath($dir . '/classes'));
+        }
     }
 
     public function getBaseUrl()
@@ -48,8 +65,7 @@ class App
 
     public function run()
     {
-
-        // Get URI
+        // Get URI.
         $base_url_length = strlen($this->getBaseUrl());
         $uri = strtolower(substr($_SERVER['REQUEST_URI'], $base_url_length));
         if (strpos($uri, '?') !== false) {
@@ -57,7 +73,8 @@ class App
         }
         $found = false;
 
-        foreach (scandir(__DIR__ . '/Controller') as $cl) {
+        // Find the right controller.
+        foreach ($this->modules->listDir('classes/Controller') as $cl) {
             if (substr($cl, -4) == '.php') {
                 $controllerName = pathinfo($cl, PATHINFO_FILENAME);
                 $controllerClass = 'Klio\Controller\\' . $controllerName;
@@ -68,7 +85,6 @@ class App
                         $found = true;
                         $method = strtolower($_SERVER['REQUEST_METHOD']);
                         array_shift($matches);
-                        //call_user_func_array(array($controller, $method), $matches);
                         $this->callControllerMethod($controller, $method, $matches);
                         exit(0);
                     }
@@ -92,24 +108,11 @@ class App
             $installUrl = $controller->getBaseUrl() . '/install';
             $errorView = $controller->getView('error');
             $errorView->title = 'Error';
-            $errorView->message = '<p>'.$e->getMessage().'</p>'
+            $errorView->message = '<p>' . $e->getMessage() . '</p>'
                     . '<p><a href="' . $installUrl . '" class="button radius">Install or upgrade</a></p>';
             $errorView->baseurl = $controller->getBaseUrl();
             $errorView->render();
             exit(1);
         }
-    }
-
-    public static function getControllerNames()
-    {
-        $out = array();
-        foreach (scandir(__DIR__ . '/Klio/Controller') as $cl) {
-            $controllerName = pathinfo($cl, PATHINFO_FILENAME);
-            $controllerClass = 'Klio\Controller\\' . $controllerName;
-            if (class_exists($controllerClass)) {
-                $out[] = $controllerClass;
-            }
-        }
-        return $out;
     }
 }

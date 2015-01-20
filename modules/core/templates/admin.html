@@ -1,0 +1,32 @@
+{% extends "page.html" %}
+
+{% block content %}
+
+<form action="{{baseurl}}/admin" method="post">
+    <fieldset>
+        <legend>General</legend>
+        <div class="row full-width">
+            <div class="medium-4 columns">
+                <label>Site title:</label>
+                <input type="text" name="site_title" value="{{site_title}}" />
+            </div>
+            <div class="medium-4 columns">
+                <label>Skin:</label>
+                <select name="skin">
+                    {% for skin in skins %}
+                    <option value="{{skin}}">{{skin}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="medium-4 columns">
+                <label>Records per page:</label>
+                <input type="text" name="records_per_page" value="{{records_per_page}}" class="numeric" />
+            </div>
+        </div>
+    </fieldset>
+    <p>
+        <input class="medium button" type="submit" value="Save" />
+    </p>
+</form>
+
+{%endblock%}

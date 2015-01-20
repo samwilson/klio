@@ -5,8 +5,10 @@ namespace Klio;
 class Controller
 {
 
+    /** @var string */
     protected $baseDir;
 
+    /** @var string */
     protected $baseUrl;
 
     /** @var \Klio\DB\Database The database. */
@@ -32,26 +34,26 @@ class Controller
         return $this->baseDir;
     }
 
-    public function setBaseDir($baseDir)
-    {
-        $this->baseDir = $baseDir;
-    }
+//    public function setBaseDir($baseDir)
+//    {
+//        $this->baseDir = $baseDir;
+//    }
 
     public function getBaseUrl()
     {
         return $this->baseUrl;
     }
 
-    public function setBaseUrl($baseUrl)
-    {
-        $this->baseUrl = $baseUrl;
-    }
+//    public function setBaseUrl($baseUrl)
+//    {
+//        $this->baseUrl = $baseUrl;
+//    }
 
     public function getView($template)
     {
         $view = new View($this->getBaseDir(), $template);
-        $view->title = Settings::siteTitle();
         $view->baseurl = $this->getBaseUrl();
+        $view->title = Settings::siteTitle();
         if ($this->db) {
             $view->tables = $this->db->getTables(true);
         }

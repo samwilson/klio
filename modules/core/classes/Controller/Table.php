@@ -12,6 +12,13 @@ class Table extends \Klio\Controller
         );
     }
 
+    public function getNavItems()
+    {
+        return array(
+            'Search'
+        );
+    }
+
     public function get($tableName, $pageNum = 1)
     {
         if (empty($pageNum)) {
@@ -47,5 +54,4 @@ class Table extends \Klio\Controller
     {
         
     }
-
 }

@@ -47,14 +47,13 @@ class Arr
      * @param integer $min_length
      * @return array[string]
      */
-    static public function get_prefix_groups($arr, $min_length = 4)
+    public static function getPrefixGroups($arr, $min_length = 4)
     {
         $out = array();
         asort($arr);
         $arr = array_values($arr);
         for ($str1_idx = 0; $str1_idx < count($arr); $str1_idx++) {
             for ($str2_idx = 0; $str2_idx < count($arr); $str2_idx++) {
-
                 $str1 = $arr[$str1_idx];
                 $str2 = $arr[$str2_idx];
 
@@ -77,29 +76,28 @@ class Arr
                 // 'is_other' and 'is_self' are with respect to str1 and str2.
                 $is_long_enough = strlen($lcp) > $min_length;
                 $is_self = $lcp == $str1;
-                $has_common_neighbours = $prev > $min_length OR $next > $min_length;
-                $is_superstring_of_prev = $prev > $min_length AND strpos($lcp, $prev_lcp) !== FALSE;
-                $is_superstring_of_next = $next > $min_length AND strpos($lcp, $next_lcp) !== FALSE;
+                $hasCommonNeighbours = $prev > $min_length or $next > $min_length;
+                $isSuperstringOfPrev = $prev > $min_length and strpos($lcp, $prev_lcp) !== false;
+                $isSuperstringOfNext = $next > $min_length and strpos($lcp, $next_lcp) !== false;
                 $not_in_result = !in_array($lcp, $out);
-                $is_superstring_of_existing = FALSE;
+                $is_superstring_of_existing = false;
                 foreach ($out as $i) {
-                    if (strpos($lcp, $i) !== FALSE AND strlen($lcp) > $min_length) {
-                        $is_superstring_of_existing = TRUE;
+                    if (strpos($lcp, $i) !== false and strlen($lcp) > $min_length) {
+                        $is_superstring_of_existing = true;
                         continue;
                     }
                 }
                 $ends_in_underscore = substr($lcp, -1) == '_';
 
                 // Put it all together.
-                if ($is_long_enough AND $not_in_result AND ! $is_superstring_of_existing AND $ends_in_underscore
-                        AND ( (!$is_self AND $has_common_neighbours AND ! $is_superstring_of_prev AND $is_superstring_of_next)
-                        OR ( $is_self AND ! $has_common_neighbours AND ! $is_superstring_of_prev AND ! $is_superstring_of_next)
-                        OR ( !$is_self AND $has_common_neighbours AND $is_superstring_of_prev AND $is_superstring_of_next))) {
+                if ($is_long_enough and $not_in_result and ! $is_superstring_of_existing and $ends_in_underscore
+                        and ( (!$is_self and $hasCommonNeighbours and ! $isSuperstringOfPrev and $isSuperstringOfNext)
+                        or ( $is_self and ! $hasCommonNeighbours and ! $isSuperstringOfPrev and ! $isSuperstringOfNext)
+                        or ( !$is_self and $hasCommonNeighbours and $isSuperstringOfPrev and $isSuperstringOfNext))) {
                     $out[] = $lcp;
                 }
             }
         }
         return $out;
     }
-
 }

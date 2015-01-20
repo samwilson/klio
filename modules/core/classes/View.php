@@ -9,17 +9,35 @@ class View
     private $data = array();
 
     /** @var string */
-    private $template;
+    private $template = false;
 
     /** @var string */
-    private $baseDir;
+    protected $baseDir;
 
     public function __construct($baseDir, $template = null)
     {
         $this->baseDir = $baseDir;
-        $this->template = $template;
-        $this->data['app_title'] = \Klio\App::name() . ' ' . \Klio\App::version();
+        // Find the template file.
+        $this->template = $this->resolveTemplateFile($template);
+        if (!$this->template) {
+            throw new \Exception("Template not found: $template");
+        }
+
+        $this->data['app_title'] = App::name() . ' ' . App::version();
+        $this->data['semver'] = App::version();
         $this->data['site_title'] = Settings::get('site_title', $this->data['app_title']);
+    }
+
+    public function resolveTemplateFile($name)
+    {
+        $templateFilename = "templates/$name.html";
+        $mods = new Modules($this->baseDir);
+        foreach ($mods->listDir(dirname($templateFilename)) as $t) {
+            if (substr($t, -strlen($templateFilename)) == $templateFilename) {
+                return $t;
+            }
+        }
+        return false;
     }
 
     public function __set($name, $value)
@@ -27,30 +45,25 @@ class View
         $this->data[$name] = $value;
     }
 
-    public function render()
+    public function render($return = false)
     {
         $this->queries = DB\Database::getQueries();
-        $skinName = Settings::get('skin', 'default');
-        $skindir = $this->baseDir . '/skins/' . $skinName;
-        $loader = new \Twig_Loader_Filesystem($skindir . '/html');
-
+        $loader = new \Twig_Loader_Filesystem(dirname($this->template));
         $twig = new \Twig_Environment($loader, array(
             'debug' => true,
             'strct_variables' => true
         ));
         $twig->addExtension(new \Twig_Extension_Debug());
-        //$twig = new \Twig_Environment($loader);
-        $templateName = strtolower($this->template . '.html');
+        $templateName = strtolower(basename($this->template));
         if (!$loader->exists($templateName)) {
-            exit("Template not found: $skindir/$templateName");
+            throw new \Exception("Template not found: $templateName");
         }
-        echo $twig->render($templateName, $this->data);
-    }
-
-    public function skins()
-    {
-        $skins = scandir($this->baseDir . '/skins');
-        return preg_grep('/^\./', $skins, PREG_GREP_INVERT);
+        $string = $twig->render($templateName, $this->data);
+        if (!$return) {
+            echo $string;
+        } else {
+            return $string;
+        }
     }
 
     /**

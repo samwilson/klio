@@ -1,1 +1,1 @@
-./vendor/bin/phpcs --standard=PSR2 application tests
+./vendor/bin/phpcs --standard=PSR2 modules/*/classes

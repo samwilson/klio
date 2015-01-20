@@ -16,6 +16,7 @@ class Index extends \Klio\Controller
     {
         $this->db = $this->getDatabase();
         $view = $this->getView('index');
+        $view->title = 'Home';
         $view->render();
     }
 }
