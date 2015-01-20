@@ -12,5 +12,4 @@ class PermissionsTest extends KlioTestCase
     {
         
     }
-
 }

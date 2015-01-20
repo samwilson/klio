@@ -1,1 +1,1 @@
-./vendor/bin/phpcs --standard=PSR2 modules/*/classes
+./vendor/bin/phpcs --report=full --standard=PSR2 modules/*/classes modules/*/tests
