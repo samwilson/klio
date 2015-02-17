@@ -22,7 +22,7 @@ class Arr
         $prefix = "";
         $length = min(strlen($str1), strlen($str2));
         for ($l = 0; $l <= $length; $l++) {
-            if ($str1[$l] != $str2[$l]) {
+            if (!isset($str1[$l]) || !isset($str2[$l]) || $str1[$l] != $str2[$l]) {
                 return substr($str1, 0, $l);
             }
 //            $substr = substr($str1, 0, $l);
