@@ -11,33 +11,18 @@ class View
     /** @var string */
     private $template = false;
 
-    /** @var string */
-    protected $baseDir;
+    /** @var Modules */
+    protected $modules;
 
     public function __construct($baseDir, $template = null)
     {
-        $this->baseDir = $baseDir;
-        // Find the template file.
-        $this->template = $this->resolveTemplateFile($template);
-        if (!$this->template) {
-            throw new \Exception("Template not found: $template");
-        }
+        $this->template = $template . '.html';
+        $this->modules = new Modules($baseDir);
 
+        $this->data['modules'] = array_keys($this->modules->getPaths());
         $this->data['app_title'] = App::name() . ' ' . App::version();
         $this->data['semver'] = App::version();
         $this->data['site_title'] = Settings::get('site_title', $this->data['app_title']);
-    }
-
-    public function resolveTemplateFile($name)
-    {
-        $templateFilename = "templates/$name.html";
-        $mods = new Modules($this->baseDir);
-        foreach ($mods->listDir(dirname($templateFilename)) as $t) {
-            if (substr($t, -strlen($templateFilename)) == $templateFilename) {
-                return $t;
-            }
-        }
-        return false;
     }
 
     public function __set($name, $value)
@@ -48,17 +33,16 @@ class View
     public function render($return = false)
     {
         $this->queries = DB\Database::getQueries();
-        $loader = new \Twig_Loader_Filesystem(dirname($this->template));
+        $loader = new \Twig_Loader_Filesystem();
+        foreach ($this->modules->getPaths() as $path) {
+            $loader->addPath($path . '/templates');
+        }
         $twig = new \Twig_Environment($loader, array(
             'debug' => true,
             'strct_variables' => true
         ));
         $twig->addExtension(new \Twig_Extension_Debug());
-        $templateName = strtolower(basename($this->template));
-        if (!$loader->exists($templateName)) {
-            throw new \Exception("Template not found: $templateName");
-        }
-        $string = $twig->render($templateName, $this->data);
+        $string = $twig->render($this->template, $this->data);
         if (!$return) {
             echo $string;
         } else {

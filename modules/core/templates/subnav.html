@@ -25,4 +25,8 @@
     </dd>
     -->
 
+    {% for mod in modules %}
+    {% include 'subnav/'~mod~'.html' ignore missing %}
+    {% endfor %}
+
 </dl>

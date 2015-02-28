@@ -1,0 +1,10 @@
+
+<dd class="{% if active=='calendar' %}active{% endif %}">
+    <a
+        {% if table.getColumns('date') %}
+        href="{{baseurl}}/calendar/{{table.name}}"
+        {% endif %}
+        >
+        Calendar
+    </a>
+</dd>

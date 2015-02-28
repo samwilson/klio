@@ -88,4 +88,14 @@ class SchemaTest extends KlioTestCase
         $testTable->saveRecord(array('id' => 1, 'a_date' => '2015-01-12'));
         $this->assertEquals('2015-01-12', $testTable->getRecord(1)->a_date());
     }
+
+    /**
+     * @test
+     */
+    public function getColumnsByType()
+    {
+        $testTable = $this->db->getTable('test_table');
+        $dateCols = $testTable->getColumns('date');
+        $this->assertEquals(array('a_date'), array_keys($dateCols));
+    }
 }

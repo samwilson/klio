@@ -108,8 +108,7 @@ class App
             $installUrl = $controller->getBaseUrl() . '/install';
             $errorView = $controller->getView('error');
             $errorView->title = 'Error';
-            $errorView->message = '<p>' . $e->getMessage() . '</p>'
-                    . '<p><a href="' . $installUrl . '" class="button radius">Install or upgrade</a></p>';
+            $errorView->message = '<p>' . $e->getMessage() . '</p>';
             $errorView->baseurl = $controller->getBaseUrl();
             $errorView->render();
             exit(1);

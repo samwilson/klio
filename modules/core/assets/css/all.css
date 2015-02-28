@@ -8,3 +8,7 @@ is-foreign-key { text-align:left }
 table tbody th,
 table tbody td { vertical-align:top }
 table tbody td.type-int { text-align:right }
+
+table.calendar { width:100% }
+table.calendar td { padding:0; }
+table.calendar td .day { float:right }

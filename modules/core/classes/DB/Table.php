@@ -157,23 +157,23 @@ class Table
 
             // LIKE or NOT LIKE
             if ($filter['operator'] == 'like' || $filter['operator'] == 'not like') {
-                $where_clause .= ' AND CONVERT(' . $filter['column'] . ', CHAR) '
+                $where_clause .= ' AND CONVERT(`' . $filter['column'] . '`, CHAR) '
                         . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = '%' . $filter['value'] . '%';
             } // Equals or does-not-equal
             elseif ($filter['operator'] == '=' || $filter['operator'] == '!=') {
-                $where_clause .= ' AND ' . $filter['column'] . ' '
+                $where_clause .= ' AND `' . $filter['column'] . '` '
                         . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = $filter['value'];
             } // IS EMPTY
             elseif ($filter['operator'] == 'empty') {
-                $where_clause .= ' AND (' . $filter['column'] . ' IS NULL OR ' . $filter['column'] . ' = "")';
+                $where_clause .= ' AND (`' . $filter['column'] . '` IS NULL OR ' . $filter['column'] . ' = "")';
             } // IS NOT EMPTY
             elseif ($filter['operator'] == 'not empty') {
-                $where_clause .= ' AND (' . $filter['column'] . ' IS NOT NULL AND ' . $filter['column'] . ' != "")';
+                $where_clause .= ' AND (`' . $filter['column'] . '` IS NOT NULL AND ' . $filter['column'] . ' != "")';
             } // Other operators. They're already validated in $this->addFilter()
             else {
-                $where_clause .= ' AND (' . $filter['column'] . ' ' . $filter['operator'] . ' :' . $param_name . ')';
+                $where_clause .= ' AND (`' . $filter['column'] . '` ' . $filter['operator'] . ' :' . $param_name . ')';
                 $params[$param_name] = $filter['value'];
             }
 
@@ -414,7 +414,7 @@ class Table
     {
         if (!$this->recordCount) {
             $pk = $this->getPkColumn()->getName();
-            $sql = 'SELECT COUNT(`'.$this->getName().'`.`' . $pk . '`) as `count` FROM `' . $this->getName() . '`';
+            $sql = 'SELECT COUNT(`' . $this->getName() . '`.`' . $pk . '`) as `count` FROM `' . $this->getName() . '`';
             $params = $this->applyFilters($sql);
             $result = $this->database->query($sql, $params);
             $this->recordCount = $result->fetchColumn();
@@ -492,9 +492,19 @@ class Table
      *
      * @return array|Column This table's columns.
      */
-    public function getColumns()
+    public function getColumns($type = null)
     {
-        return $this->columns;
+        if (is_null($type)) {
+            return $this->columns;
+        } else {
+            $out = array();
+            foreach ($this->getColumns() as $col) {
+                if ($col->getType() == $type) {
+                    $out[$col->getName()] = $col;
+                }
+            }
+            return $out;
+        }
     }
 
     /**
@@ -797,7 +807,6 @@ class Table
             }
         }
         //echo '<pre>'; var_dump($data); exit();
-
         // Update?
         $primaryKeyName = $this->getPkColumn()->getName();
         if ($primaryKeyValue) {
@@ -811,7 +820,7 @@ class Table
 //                    $pairs[] = "`$col` = NULL";
 //                    unset($data[$col]);
 //                } else {
-                    $pairs[] = "`$col` = :$col";
+                $pairs[] = "`$col` = :$col";
                 //}
             }
             $sql = "UPDATE " . $this->getName() . " SET " . join(', ', $pairs)

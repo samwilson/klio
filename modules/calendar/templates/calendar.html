@@ -1,0 +1,37 @@
+{%extends "page.html"%}
+
+{% block content %}
+
+{% include "subnav.html" with {'active': 'calendar'} %}
+
+<table class="calendar">
+    <caption>{{month.format('F Y')}}</caption>
+    <thead>
+        <tr>
+            {% for day in weekdays %}
+            <th>{{day}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for week in month %}
+        <tr>
+            {% for day in week %}
+            <td>
+                <span class="day">{{day.format('j')}}</span>
+                {% set rec = attribute(records, day.format('Y-m-d')) %}
+                {% if rec %}
+                <ul>
+                    <li>
+                        <a href="{{baseurl}}/record/{{table.name}}/{{rec.primaryKey}}">{{rec.title}}</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
