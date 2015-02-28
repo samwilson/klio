@@ -25,6 +25,14 @@ class SchemaTest extends KlioTestCase
     /**
      * @test
      */
+    public function tables()
+    {
+        $this->assertContains('test_table', $this->db->getTableNames());
+    }
+
+    /**
+     * @test
+     */
     public function nullAndEmptyValues()
     {
         $testTable = $this->db->getTable('test_table');
