@@ -93,11 +93,16 @@
 
 </form>
 
-{% for table in table.referencingTables %}
-<div class="referencing-table">
-<h2>{{ table.table.title }}</h2>
+{% for refTab in table.referencingTables %}
 
-<!--{ include "table.html" with {'table': table} %}-->
+<div class="referencing-table">
+<h2>{{ refTab.name }}</h2>
+
+{{refTab.countRecords}}
+
+{% if refTab.countRecords < 10 %}
+    {% include "table.html" with {'table': refTab} %}
+{% endif %}
 
 
 </div><!-- .referencing-table -->

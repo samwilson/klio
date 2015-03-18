@@ -98,7 +98,7 @@ class Column
 
         // Is this a foreign key?
         if (in_array($this->name, $table->getForeignKeyNames())) {
-            $referencedTables = $table->getReferencedTables();
+            $referencedTables = $table->getReferencedTables(false);
             $this->references = $referencedTables[$this->name];
         }
 

@@ -33,10 +33,17 @@ class View
     public function render($return = false)
     {
         $this->queries = DB\Database::getQueries();
+
+        // Load template directories.
         $loader = new \Twig_Loader_Filesystem();
         foreach ($this->modules->getPaths() as $path) {
-            $loader->addPath($path . '/templates');
+            // Load the module's template diretory if it exists.
+            if (is_dir($path . '/templates')) {
+                $loader->addPath($path . '/templates');
+            }
         }
+
+        // Set up Twig.
         $twig = new \Twig_Environment($loader, array(
             'debug' => true,
             'strct_variables' => true

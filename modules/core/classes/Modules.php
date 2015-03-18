@@ -41,4 +41,16 @@ class Modules
         }
         return $out;
     }
+
+    public function register($event, $callback)
+    {
+        
+    }
+
+    public function fire($event)
+    {
+        foreach ($this->getPaths() as $mod) {
+            
+        }
+    }
 }

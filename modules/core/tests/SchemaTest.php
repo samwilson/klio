@@ -17,9 +17,21 @@ class SchemaTest extends KlioTestCase
                 . ' title VARCHAR(100) NOT NULL,'
                 . ' description TEXT NULL,'
                 . ' active BOOLEAN NULL DEFAULT TRUE,'
-                . ' a_date DATE NULL'
+                . ' a_date DATE NULL,'
+                . ' type_id INT(10) NULL DEFAULT NULL'
                 . ')';
         $this->db->query($sql);
+        $sql = 'CREATE TABLE test_types ('
+                . ' id INT(10) PRIMARY KEY,'
+                . ' title VARCHAR(100) NOT NULL'
+                . ')';
+        $this->db->query($sql);
+        $this->db->query(
+                "ALTER TABLE `test_table`"
+                . " ADD FOREIGN KEY ( `type_id` )"
+                . " REFERENCES `test_types` (`id`)"
+                . " ON DELETE CASCADE ON UPDATE CASCADE;"
+        );
     }
 
     /**
@@ -28,6 +40,13 @@ class SchemaTest extends KlioTestCase
     public function tables()
     {
         $this->assertContains('test_table', $this->db->getTableNames());
+
+        // That test_table references test_types
+        $testTable = $this->db->getTable('test_table');
+        $this->assertEquals('test_types', array_pop($testTable->getReferencedTables(true))->getName());
+
+        $typeTable = $this->db->getTable('test_types');
+        $this->assertEquals('test_table', array_pop($typeTable->getReferencingTables())->getName());
     }
 
     /**

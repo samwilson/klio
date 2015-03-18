@@ -23,10 +23,11 @@ class Table
     /** @var string The statement parameters most recently saved by $this->getRows() */
     protected $savedParameters;
 
-    /**
-     * @var array|Table Array of tables referred to by columns in this one.
-     */
+    /** @var array|Table Array of tables referred to by columns in this one. */
     protected $referencedTables;
+
+    /** @var array|string The names (only) of tables referenced by columns in this one. */
+    protected $referencedTableNames;
 
     /** @var array Each joined table gets a unique alias, based on this. */
     protected $aliasCount = 1;
@@ -594,40 +595,54 @@ class Table
     }
 
     /**
-     * Get a list of a table's foreign keys and the tables to which they refer.
+     * Get a list of this table's foreign keys and the tables to which they refer.
      * This does <em>not</em> take into account a user's permissions (i.e. the
      * name of a table which the user is not allowed to read may be returned).
      *
      * @return array[string => string] The list of <code>column_name => table_name</code> pairs.
      */
-    public function getReferencedTables()
+    public function getReferencedTables($instantiate = false)
     {
-        if (!isset($this->referencedTables)) {
+
+        // Extract the FK info from the CREATE TABLE statement.
+        if (!is_array($this->referencedTables)) {
+            $this->referencedTableNames = array();
             $definingSql = $this->getDefiningSql();
             $foreignKeyPattern = '|FOREIGN KEY \(`(.*?)`\) REFERENCES `(.*?)`|';
             preg_match_all($foreignKeyPattern, $definingSql, $matches);
             if (isset($matches[1]) && count($matches[1]) > 0) {
-                $this->referencedTables = array_combine($matches[1], $matches[2]);
-            } else {
-                $this->referencedTables = array();
+                foreach (array_combine($matches[1], $matches[2]) as $colName => $tabName) {
+                    $this->referencedTableNames[$colName] = $tabName;
+                }
             }
         }
-        return $this->referencedTables;
+
+        if ($instantiate) {
+            $this->referencedTables = array();
+            foreach ($this->referencedTableNames as $refCol => $refTab) {
+                $this->referencedTables[$refCol] = $this->getDatabase()->getTable($refTab);
+            }
+        }
+
+        return ($instantiate) ? $this->referencedTables : $this->referencedTableNames;
     }
 
     /**
      * Get tables with foreign keys referring here.
      *
-     * @return array|Table Of the format: `array('table' => Table, 'column' => string)`
+     * @return array|Table
      */
     public function getReferencingTables()
     {
         $out = array();
-        foreach ($this->database->getTables() as $table) {
-            $foreign_tables = $table->getReferencedTables();
-            foreach ($foreign_tables as $foreign_column => $foreign_table) {
-                if ($foreign_table == $this->name) {
-                    $out[] = array('table' => $table, 'column' => $foreign_column);
+        // For all tables in the Database...
+        foreach ($this->getDatabase()->getTables() as $table) {
+            // ...get a list of the tables they reference.
+            $foreignTables = $table->getReferencedTables();
+            foreach ($foreignTables as $foreignColumn => $referencedTableName) {
+                // If this table is a referenced table, collect the table from which it's referenced.
+                if ($referencedTableName == $this->getName()) {
+                    $out[] = $table; //array('table' => $table, 'column' => $foreign_column);
                 }
             }
         }
@@ -641,7 +656,7 @@ class Table
      */
     public function getForeignKeyNames()
     {
-        return array_keys($this->getReferencedTables());
+        return array_keys($this->getReferencedTables(false));
     }
 
     /**
@@ -812,16 +827,7 @@ class Table
         if ($primaryKeyValue) {
             $pairs = array();
             foreach ($data as $col => $val) {
-//                var_dump($val);
-//                if (is_bool($val)) {
-//                    $pairs[] = "`$col` = ".(($val) ? 'TRUE' : 'FALSE');
-//                    unset($data[$col]);
-//                } elseif (is_null($val)) {
-//                    $pairs[] = "`$col` = NULL";
-//                    unset($data[$col]);
-//                } else {
                 $pairs[] = "`$col` = :$col";
-                //}
             }
             $sql = "UPDATE " . $this->getName() . " SET " . join(', ', $pairs)
                     . " WHERE `$primaryKeyName` = :primaryKeyValue";
