@@ -16,7 +16,10 @@ class RecordDelete extends \Klio\Controller
     {
         $this->db = $this->getDatabase();
         $table = $this->db->getTable($tableName);
-        $view = $this->getView('delete');
+        if (!$table) {
+            throw new \Exception("The '$tableName' table was not found.");
+        }
+        $view = $this->getView('delete.html');
         $view->table = $table;
         $row = $table->getRecord($recordId);
         if (!$row) {
@@ -33,13 +36,13 @@ class RecordDelete extends \Klio\Controller
     public function post($tableName, $recordId = null)
     {
         if (!\Klio\Arr::get($_POST, 'confirm')) {
-            header("Location:$this->baseUrl/record/$tableName/$recordId");
+            header("Location:" . $this->getBaseUrl() . "/record/$tableName/$recordId");
             exit(0);
         }
         $this->db = $this->getDatabase();
         $table = $this->db->getTable($tableName);
         $table->deleteRecord($recordId);
-        header("Location:$this->baseUrl/table/$tableName");
+        header("Location:" . $this->getBaseUrl() . "/table/$tableName");
         exit(0);
     }
 }

@@ -1,5 +1,10 @@
 <?php
 
+if (php_sapi_name() == 'cli') {
+    echo 'Please use cli.php instead.';
+    exit(1);
+}
+
 require 'vendor/autoload.php';
 
 $baseurl = '/';

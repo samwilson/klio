@@ -65,7 +65,8 @@
     <tbody>
         {% for record in records %}
         <tr>
-            <td><a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}" class="">Edit</a></td>
+            <td>
+                <a href="{{baseurl}}/record/{{table.name}}/{{record.getPrimaryKey}}" class="">Edit</a></td>
             {% for column in table.columns %}
             <td class="type-{{ column.type }} {% if column.isForeignKey %}is-foreign-key{% endif %}">
 

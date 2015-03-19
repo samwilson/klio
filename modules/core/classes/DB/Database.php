@@ -5,6 +5,11 @@ namespace Klio\DB;
 class Database
 {
 
+    /**
+     * This event is triggered when the list of table names is being requested from the database.
+     */
+    const GET_TABLE_NAMES_EVENT = 'db.database.get_table_names';
+
     /** @var array|string */
     protected $table_names;
 
@@ -17,78 +22,57 @@ class Database
     /** @var array|string */
     static protected $queries;
 
-    public function __construct($test = false)
+    public function __construct($config)
     {
         if (self::$pdo) {
             return;
         }
-        // Try to find the config file.
-        $dirs = array(
-            dirname(__DIR__ . '/../..'),
-            dirname(\Klio\Arr::get($_SERVER, 'SCRIPT_FILENAME')),
-            \Klio\Arr::get($_SERVER, 'PWD'),
-        );
-        foreach ($dirs as $dir) {
-            $configFile = $dir . '/config.php';
-            if (file_exists($configFile)) {
-                require $configFile;
-            }
-            if (isset($database_config)) {
-                break;
-            }
-        }
-        if (!isset($database_config)) {
-            throw new Exception("Database configuration not found.");
-        }
-        // Connect to the database.
-        $host = \Klio\Arr::get($database_config, 'hostname', 'localhost');
-        $dbname = $database_config['database'] . ($test ? '_test' : '');
-        $dsn = "mysql:host=$host;dbname=$dbname";
+        $dsn = "mysql:host=" . $config['hostname'] . ";dbname=" . $config['database'];
         $attr = array(\PDO::ATTR_TIMEOUT => 10);
-        self::$pdo = new \PDO($dsn, $database_config['username'], $database_config['password'], $attr);
+        self::$pdo = new \PDO($dsn, $config['username'], $config['password'], $attr);
         self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->setFetchMode(\PDO::FETCH_OBJ);
     }
 
-    public function install()
+    public function install($baseDir)
     {
-        if (!$this->getTable('settings')) {
-            $this->query(
-                "CREATE TABLE settings ("
-                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                . " name VARCHAR(65) NOT NULL UNIQUE,"
-                . " value TEXT NOT NULL"
-                . ");"
-            );
+        $modules = new \Klio\Modules($baseDir);
+        foreach ($modules->getPaths() as $mod => $modPath) {
+            $installClass = 'Klio\\' . \Klio\Text::camelcase($mod) . '\\DB\\Installer';
+            if (class_exists($installClass)) {
+                $installer = new $installClass($this);
+                $installer->run();
+            }
         }
-        if (!$this->getTable('changesets')) {
-            $this->query(
-                "CREATE TABLE changesets ("
-                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
-                . " date_and_time TIMESTAMP NOT NULL,"
-                . " user_id INT(5) NULL DEFAULT NULL,"
-                . " comments VARCHAR(140) NULL DEFAULT NULL"
-                . ");"
-            );
-        }
-        if (!$this->getTable('changes')) {
-            $this->query(
-                "CREATE TABLE changes ("
-                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
-                . " changeset_id INT(10) NOT NULL,"
-                . " user_id INT(5) NULL DEFAULT NULL,"
-                . " comments VARCHAR(140) NULL DEFAULT NULL"
-                . ");"
-            );
-            $this->query(
-                "ALTER TABLE `changes`"
-                . " ADD FOREIGN KEY ( `changeset_id` )"
-                . " REFERENCES `changes` (`id`)"
-                . " ON DELETE CASCADE ON UPDATE CASCADE;"
-            );
-        }
-        $this->table_names = false;
-        $this->tables = array();
+
+//        if (!$this->getTable('changesets')) {
+//            $this->query(
+//                "CREATE TABLE changesets ("
+//                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
+//                . " date_and_time TIMESTAMP NOT NULL,"
+//                . " user_id INT(5) NULL DEFAULT NULL,"
+//                . " comments VARCHAR(140) NULL DEFAULT NULL"
+//                . ");"
+//            );
+//        }
+//        if (!$this->getTable('changes')) {
+//            $this->query(
+//                "CREATE TABLE changes ("
+//                . " id INT(4) AUTO_INCREMENT PRIMARY KEY,"
+//                . " changeset_id INT(10) NOT NULL,"
+//                . " user_id INT(5) NULL DEFAULT NULL,"
+//                . " comments VARCHAR(140) NULL DEFAULT NULL"
+//                . ");"
+//            );
+//            $this->query(
+//                "ALTER TABLE `changes`"
+//                . " ADD FOREIGN KEY ( `changeset_id` )"
+//                . " REFERENCES `changes` (`id`)"
+//                . " ON DELETE CASCADE ON UPDATE CASCADE;"
+//            );
+//        }
+//        $this->table_names = false;
+//        $this->tables = array();
     }
 
     public static function getQueries()
@@ -165,7 +149,10 @@ class Database
         return $stmt;
     }
 
-    public function getTableNames()
+    /**
+     * @param boolean $trigger Whether to trigger events.
+     */
+    public function getTableNames($trigger = true)
     {
         if (!is_array($this->table_names)) {
             $this->table_names = array();
@@ -177,7 +164,11 @@ class Database
             }
             //sort($this->table_names);
         }
-        return $this->table_names;
+        $databaseEvent = new Event($this, $this->table_names);
+        if ($trigger) {
+            \Klio\App::dispatch(self::GET_TABLE_NAMES_EVENT, $databaseEvent);
+        }
+        return $databaseEvent->data;
     }
 
     public function getTables($grouped = false)
@@ -215,11 +206,12 @@ class Database
     /**
      * Get a table object.
      * @param string $name
+     * @param boolean $trigger Whether to trigger events.
      * @return Table
      */
-    public function getTable($name)
+    public function getTable($name, $trigger = true)
     {
-        if (!in_array($name, $this->getTableNames())) {
+        if (!in_array($name, $this->getTableNames($trigger))) {
             return false;
         }
         if (!isset($this->tables[$name])) {

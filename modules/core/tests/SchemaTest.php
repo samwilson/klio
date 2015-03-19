@@ -11,7 +11,7 @@ class SchemaTest extends KlioTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->db = new \Klio\DB\Database(true);
+        $this->db = $this->getDb();
         $sql = 'CREATE TABLE test_table ('
                 . ' id INT(10) PRIMARY KEY,'
                 . ' title VARCHAR(100) NOT NULL,'

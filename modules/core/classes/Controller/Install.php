@@ -15,15 +15,14 @@ class Install extends \Klio\Controller
 
     public function get($stage = 1)
     {
-        $view = $this->getView('install');
+        $view = $this->getView('install.html');
         $view->title = 'Install';
         $view->render();
     }
 
     public function post()
     {
-        $db = $this->getDatabase();
-        $db->install();
+        $this->getDatabase()->install($this->getBaseDir());
         header("Location:" . $this->getBaseUrl());
     }
 }

@@ -20,7 +20,7 @@
                 href="{{baseurl}}/table/{{table.name}}/{{p}}"
                 {% endif %}
                 >
-                {{p}}
+                {{p|number_format}}
             </a>
         </li>
         {% elseif p==6 or p==table.currentPageNum-6 or p==table.currentPageNum+6 or p==table.pageCount-6  %}

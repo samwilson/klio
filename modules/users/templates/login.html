@@ -1,0 +1,42 @@
+{% extends "page.html" %}
+
+{% block content %}
+
+<div class="row"><p>Log in to {{site_title}} using {{auth}} authentication.</p></div>
+<form action="{{baseurl}}/login" method="post">
+    <div class="row">
+        <div class="small-2 columns">
+            <label for="username" class="right inline">Username</label>
+        </div>
+        <div class="small-4 columns">
+            <input type="text" name="username" id="username" />
+        </div>
+        <div class="small-6 columns">
+            {% if auth=='ldap' %}
+            <label class="inline">{{ldap.account_suffix}}</label>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-2 columns">
+            <label for="password" class="right inline">Password</label>
+        </div>
+        <div class="small-4 columns">
+            <input type="password" name="password" id="password" />
+        </div>
+        <div class="small-6 columns">
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-2 columns">
+            &nbsp;
+        </div>
+        <div class="small-4 columns">
+            <input type="submit" value="Log in" class="button success" />
+        </div>
+        <div class="small-6 columns">
+        </div>
+    </div>
+</form>
+
+{% endblock %}

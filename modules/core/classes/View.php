@@ -16,13 +16,18 @@ class View
 
     public function __construct($baseDir, $template = null)
     {
-        $this->template = $template . '.html';
-        $this->modules = new Modules($baseDir);
+        $this->template = $template;
 
+        $this->modules = new Modules($baseDir);
         $this->data['modules'] = array_keys($this->modules->getPaths());
+
         $this->data['app_title'] = App::name() . ' ' . App::version();
         $this->data['semver'] = App::version();
-        $this->data['site_title'] = Settings::get('site_title', $this->data['app_title']);
+
+        $settings = new Settings($baseDir);
+        $this->data['site_title'] = $settings->get('site_title', $this->data['app_title']);
+
+        $this->data['alerts'] = Arr::get($_SESSION, 'alerts', array());
     }
 
     public function __set($name, $value)
@@ -71,9 +76,9 @@ class View
             'message' => $message,
         );
         if ($delayed) {
-            $_SESSION['messages'][] = $msg;
+            $_SESSION['alerts'][] = $msg;
         } else {
-            $this->data->messages[] = $msg;
+            $this->data['alerts'][] = $msg;
         }
     }
 }

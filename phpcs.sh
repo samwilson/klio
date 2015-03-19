@@ -1,4 +1,6 @@
 #!/bin/bash
 
 LOC=$(dirname $0)
-$LOC/vendor/bin/phpcs --standard=PSR2 --extensions=php $LOC/modules/*/classes $LOC/modules/*/tests
+ARGS="--standard=PSR2 --extensions=php $LOC/modules/*/classes $LOC/modules/*/tests"
+#$LOC/vendor/bin/phpcbf $ARGS
+$LOC/vendor/bin/phpcs $ARGS
