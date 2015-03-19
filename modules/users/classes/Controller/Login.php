@@ -24,21 +24,9 @@ class Login extends \Klio\Controller
 
     public function post()
     {
-        if ($this->config->get('auth') == 'LDAP') {
-            $config = array(
-                'account_suffix' => '',
-                'base_dn' => '',
-                'domain_controllers' => array(),
-                'admin_username' => '',
-                'admin_password' => '',
-                'real_primarygroup' => '',
-                'use_ssl' => '',
-                'use_tls' => '',
-                'recursive_groups' => '',
-                'ad_port' => '',
-                'sso' => '',
-            );
-            $adldap = new \adLDAP\adLDAP($config);
+        $authenticated = false;
+        if (strtoupper($this->settings->get('auth')) == 'LDAP') {
+            $adldap = new \adLDAP\adLDAP($this->settings->get('ldap'));
             $authenticated = $adldap->authenticate($_POST['username'], $_POST['password']);
         }
 

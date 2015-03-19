@@ -24,8 +24,8 @@
                 <section class="top-bar-section">
                     <!-- Right Nav Section -->
                     <ul class="right" id="menu_2">
-                        {% for mod,path in modulePaths %}
-                        {% include "menu_2_#{mod}.html" ignore missing %}
+                        {% for mod in modules %}
+                        {% include 'menu_right_'~mod~'.html' ignore missing %}
                         {% endfor %}
                     </ul>
 
