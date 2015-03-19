@@ -27,6 +27,9 @@ class View
         $settings = new Settings($baseDir);
         $this->data['site_title'] = $settings->get('site_title', $this->data['app_title']);
 
+        if (!isset($_SESSION)) {
+            session_start();
+        }
         $this->data['alerts'] = Arr::get($_SESSION, 'alerts', array());
     }
 
