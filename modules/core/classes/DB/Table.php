@@ -63,6 +63,9 @@ class Table
     /** @var integer The current page number. */
     protected $currentPageNum = 1;
 
+    /** @var integer The number of records to show on each page. */
+    protected $recordsPerPage = 10;
+
     /**
      * Create a new database table object.
      *
@@ -127,8 +130,8 @@ class Table
     protected function getFkJoinClause($table, $alias, $column)
     {
         return 'LEFT OUTER JOIN `' . $table->getName() . '` AS f' . $alias
-                . ' ON (`' . $this->getName() . '`.`' . $column->getName() . '` '
-                . ' = `f' . $alias . '`.`' . $table->get_pk_column()->getName() . '`)';
+            . ' ON (`' . $this->getName() . '`.`' . $column->getName() . '` '
+            . ' = `f' . $alias . '`.`' . $table->get_pk_column()->getName() . '`)';
     }
 
     /**
@@ -158,12 +161,12 @@ class Table
             // LIKE or NOT LIKE
             if ($filter['operator'] == 'like' || $filter['operator'] == 'not like') {
                 $where_clause .= ' AND CONVERT(`' . $filter['column'] . '`, CHAR) '
-                        . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
+                    . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = '%' . $filter['value'] . '%';
             } // Equals or does-not-equal
             elseif ($filter['operator'] == '=' || $filter['operator'] == '!=') {
                 $where_clause .= ' AND `' . $filter['column'] . '` '
-                        . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
+                    . strtoupper($filter['operator']) . ' :' . $param_name . ' ';
                 $params[$param_name] = $filter['value'];
             } // IS EMPTY
             elseif ($filter['operator'] == 'empty') {
@@ -237,8 +240,8 @@ class Table
             $fk1_table = $column->getReferencedTable();
             $fk1_title_column = $fk1_table->getTitleColumn();
             $join_clause .= ' LEFT OUTER JOIN `' . $fk1_table->getName() . '` AS f' . $this->aliasCount
-                    . ' ON (`' . $this->getName() . '`.`' . $column->getName() . '` '
-                    . ' = `f' . $this->aliasCount . '`.`' . $fk1_table->getPkColumn()->getName() . '`)';
+                . ' ON (`' . $this->getName() . '`.`' . $column->getName() . '` '
+                . ' = `f' . $this->aliasCount . '`.`' . $fk1_table->getPkColumn()->getName() . '`)';
             $column_alias = "f$this->aliasCount." . $fk1_title_column->getName();
             $this->joined_tables[] = $column_alias;
             // FK is also an FK?
@@ -246,8 +249,8 @@ class Table
                 $fk2_table = $fk1_title_column->getReferencedTable();
                 $fk2_title_column = $fk2_table->getTitleColumn();
                 $join_clause .= ' LEFT OUTER JOIN `' . $fk2_table->getName() . '` AS ff' . $this->aliasCount
-                        . ' ON (f' . $this->aliasCount . '.`' . $fk1_title_column->getName() . '` '
-                        . ' = ff' . $this->aliasCount . '.`' . $fk1_table->getPkColumn()->getName() . '`)';
+                    . ' ON (f' . $this->aliasCount . '.`' . $fk1_title_column->getName() . '` '
+                    . ' = ff' . $this->aliasCount . '.`' . $fk1_table->getPkColumn()->getName() . '`)';
                 $column_alias = "ff$this->aliasCount." . $fk2_title_column->getName();
                 $this->joined_tables[] = $column_alias;
             }
@@ -277,14 +280,14 @@ class Table
 
         // Build basic SELECT statement
         $sql = 'SELECT ' . join(',', $columns) . ' '
-                . 'FROM `' . $this->getName() . '` ' . $orderByJoin['join_clause'] . ' '
-                . 'ORDER BY ' . $orderByJoin['column_alias'] . ' ' . $this->getOrderDir();
+            . 'FROM `' . $this->getName() . '` ' . $orderByJoin['join_clause'] . ' '
+            . 'ORDER BY ' . $orderByJoin['column_alias'] . ' ' . $this->getOrderDir();
 
         $params = $this->applyFilters($sql);
 
         // Then limit to the ones on the current page.
         if ($withPagination) {
-            $recordsPerPage = \Klio\Settings::recordsPerPage();
+            $recordsPerPage = $this->getRecordsPerPage();
             $sql .= ' LIMIT ' . $recordsPerPage;
             if ($this->page() > 1) {
                 $sql .= ' OFFSET ' . ($recordsPerPage * ($this->getCurrentPageNum() - 1));
@@ -312,6 +315,16 @@ class Table
         $this->currentPageNum = $currentPageNum;
     }
 
+    public function getRecordsPerPage()
+    {
+        return $this->recordsPerPage;
+    }
+
+    public function setRecordsPerPage($recordsPerPage)
+    {
+        $this->recordsPerPage = $recordsPerPage;
+    }
+
     public function getSavedQuery()
     {
         return array(
@@ -331,9 +344,9 @@ class Table
         $pk_column = $this->getPkColumn();
         $pk_name = (!$pk_column) ? 'id' : $pk_column->getName();
         $sql = "SELECT `" . join('`, `', array_keys($this->getColumns())) . "` "
-                . "FROM `" . $this->getName() . "` "
-                . "WHERE `$pk_name` = :$pk_name "
-                . "LIMIT 1";
+            . "FROM `" . $this->getName() . "` "
+            . "WHERE `$pk_name` = :$pk_name "
+            . "LIMIT 1";
         //$this->database->setFetchMode(\PDO::FETCH_ASSOC);
         $record = $this->database->query($sql, array($pk_name => $id), '\Klio\DB\Record', array($this));
         return $record->fetch();
@@ -383,7 +396,7 @@ class Table
 
     public function getPageCount()
     {
-        return ceil($this->countRecords() / \Klio\Settings::recordsPerPage());
+        return ceil($this->countRecords() / $this->getRecordsPerPage());
     }
 
     /**
@@ -445,8 +458,8 @@ class Table
 
         // Build basic SELECT statement
         $sql = 'SELECT ' . join(',', $columns) . ' '
-                . 'FROM `' . $this->getName() . '` ' . $join_clause . ' '
-                . 'ORDER BY ' . $orderByJoin['column_alias'] . ' ' . $this->getOrderDir();
+            . 'FROM `' . $this->getName() . '` ' . $join_clause . ' '
+            . 'ORDER BY ' . $orderByJoin['column_alias'] . ' ' . $this->getOrderDir();
 
         $params = $this->applyFilters($sql);
 
@@ -463,10 +476,10 @@ class Table
             unlink($filename);
         }
         $sql .= " INTO OUTFILE '$filename' "
-                . ' FIELDS TERMINATED BY ","'
-                . ' ENCLOSED BY \'"\''
-                . ' ESCAPED BY \'"\''
-                . ' LINES TERMINATED BY "\r\n"';
+            . ' FIELDS TERMINATED BY ","'
+            . ' ENCLOSED BY \'"\''
+            . ' ESCAPED BY \'"\''
+            . ' LINES TERMINATED BY "\r\n"';
 
         $this->query($sql, $params);
         if (!file_exists($filename)) {
@@ -744,7 +757,7 @@ class Table
     public function deleteRecord($primaryKeyValue)
     {
         $sql = "DELETE FROM `" . $this->getName() . "` "
-                . "WHERE `" . $this->getPkColumn()->getName() . "` = :primaryKeyValue";
+            . "WHERE `" . $this->getPkColumn()->getName() . "` = :primaryKeyValue";
         $data = array('primaryKeyValue' => $primaryKeyValue);
         return $this->database->query($sql, $data);
     }
@@ -824,7 +837,7 @@ class Table
                 //}
             }
             $sql = "UPDATE " . $this->getName() . " SET " . join(', ', $pairs)
-                    . " WHERE `$primaryKeyName` = :primaryKeyValue";
+                . " WHERE `$primaryKeyName` = :primaryKeyValue";
             $data['primaryKeyValue'] = $primaryKeyValue;
             $this->database->query($sql, $data);
             $newPkValue = \Klio\Arr::get($data, $primaryKeyName, $primaryKeyValue);
@@ -835,8 +848,8 @@ class Table
                 unset($data[$primaryKeyName]);
             }
             $sql = "INSERT INTO " . $this->getName()
-                    . "\n( `" . join("`, `", array_keys($data)) . "` ) VALUES "
-                    . "\n( :" . join(", :", array_keys($data)) . " )";
+                . "\n( `" . join("`, `", array_keys($data)) . "` ) VALUES "
+                . "\n( :" . join(", :", array_keys($data)) . " )";
             $this->database->query($sql, $data);
             $newPkValue = $this->database->lastInsertId();
             if (!$newPkValue) {

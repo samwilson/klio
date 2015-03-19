@@ -13,6 +13,10 @@ class Modules
         $this->baseDir = $baseDir;
     }
 
+    /**
+     * Get a list of paths to modules, and module names.
+     * @return array|string Keys are module names, values are their full filesystem paths.
+     */
     public function getPaths()
     {
         $out = array();
@@ -36,7 +40,22 @@ class Modules
                 if ($d[0] == '.') {
                     continue;
                 }
-                $out[$d] = "$modDir/$dir/$d";
+                $out[] = realpath("$modDir/$dir/$d");
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Get the paths of all files matching the given path and filename.
+     * @param string The filename to search for.
+     */
+    public function listFiles($file)
+    {
+        $out = array();
+        foreach ($this->listDir(dirname($file)) as $path) {
+            if (strpos($path, $file)) {
+                $out[] = $path;
             }
         }
         return $out;

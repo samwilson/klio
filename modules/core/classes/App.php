@@ -2,11 +2,16 @@
 
 namespace Klio;
 
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
 class App
 {
 
     private $baseUrl;
     private $baseDir;
+
+    /** @var EventDispatcher */
+    public static $eventDispatcher;
 
     /** @var Modules */
     private $modules;
@@ -25,22 +30,45 @@ class App
      */
     public static function version()
     {
-        return '0.3.0';
+        return '0.5.0';
     }
 
     public function __construct($baseDir, $baseUrl)
     {
         $this->setBaseUrl($baseUrl);
         $this->setBaseDir($baseDir);
-        session_start();
+        self::$eventDispatcher = new EventDispatcher();
         $this->modules = new Modules($this->getBaseDir());
 
         // Add module paths. A hack, certainly -- but it works.
         $autoload_functions = spl_autoload_functions();
         $loader = $autoload_functions[0][0];
         foreach ($this->modules->getPaths() as $mod => $dir) {
-            $loader->addPsr4('Klio\\', realpath($dir . '/classes'));
+            $modClassPath = realpath($dir . '/classes');
+
+            if ($mod == 'core' || !$modClassPath) {
+                continue;
+            }
+            $loader->addPsr4('Klio\\', $modClassPath);
+
+            // Module metadata.
+            $eventsFile = realpath($modClassPath . '/../events.php');
+            if ($eventsFile) {
+                $events = require $eventsFile;
+                // Add event listeners.
+                foreach ($events as $event => $listener) {
+                    self::$eventDispatcher->addListener($event, [new $listener(), 'handle']);
+                }
+            }
         }
+    }
+
+    public static function dispatch($eventName, $event)
+    {
+        if (!self::$eventDispatcher instanceof EventDispatcher) {
+            self::$eventDispatcher = new EventDispatcher();
+        }
+        self::$eventDispatcher->dispatch($eventName, $event);
     }
 
     public function getBaseUrl()
@@ -105,8 +133,7 @@ class App
         try {
             call_user_func_array(array($controller, $method), $params);
         } catch (\Exception $e) {
-            $installUrl = $controller->getBaseUrl() . '/install';
-            $errorView = $controller->getView('error');
+            $errorView = $controller->getView('error.html');
             $errorView->title = 'Error';
             $errorView->message = '<p>' . $e->getMessage() . '</p>';
             $errorView->baseurl = $controller->getBaseUrl();

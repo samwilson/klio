@@ -15,8 +15,11 @@ class Record extends \Klio\Controller
     public function get($tableName, $recordId = null)
     {
         $this->db = $this->getDatabase();
-        $view = $this->getView('record');
+        $view = $this->getView('record.html');
         $table = $this->db->getTable($tableName);
+        if (!$table) {
+            throw new \Exception("The '$tableName' table was not found.");
+        }
         $view->table = $table;
         $view->columns = $table->getColumns();
         foreach ($table->getColumns() as $col) {
@@ -50,7 +53,7 @@ class Record extends \Klio\Controller
         } else {
             // Otherwise, create a new one.
             $pkVal = $table->saveRecord($_POST, $recordId);
-            header("Location:$this->baseUrl/record/$tableName/$pkVal");
+            header("Location:".$this->getBaseUrl()."/record/$tableName/$pkVal");
         }
     }
 }

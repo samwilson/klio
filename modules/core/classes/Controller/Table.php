@@ -25,9 +25,13 @@ class Table extends \Klio\Controller
             $pageNum = 1;
         }
         $this->db = $this->getDatabase();
-        $view = $this->getView('table');
+        $view = $this->getView('table.html');
         $table = $this->db->getTable($tableName);
+        if (!$table) {
+            throw new \Exception("The '$tableName' table was not found.");
+        }
         $table->setCurrentPageNum($pageNum);
+        $table->setRecordsPerPage($this->settings->get('records_per_page'));
         $view->table = $table;
         $view->columns = $table->getColumns();
         $view->title = $table->getTitle();
