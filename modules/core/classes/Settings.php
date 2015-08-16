@@ -23,8 +23,11 @@ class Settings
         }
         $tried = array();
         $modules = new Modules($this->baseDir);
+        $settingsFiles = $modules->listFiles('settings.php');
         $localSettings = realpath($this->baseDir . '/settings.php');
-        $settingsFiles = array_merge(array($localSettings), $modules->listFiles('settings.php'));
+        if ($localSettings) {
+            $settingsFiles = array_merge(array($localSettings), $settingsFiles);
+        }
         foreach ($settingsFiles as $path) {
             $tried[] = $path;
             include $path;

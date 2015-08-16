@@ -1,54 +1,57 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9164a5de39d995d14268496a3f52aabf",
+    "hash": "d217014b6bc36140ef6c6adca067f473",
     "packages": [
         {
-            "name": "adldap/adldap",
-            "version": "v4.0.2",
+            "name": "adldap2/adldap2",
+            "version": "v5.0.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ztec/adLDAP.git",
-                "reference": "20e8269d8dbb519e674daf7f567d5f0089c23c00"
+                "url": "https://github.com/Adldap2/Adldap2.git",
+                "reference": "fd4b2f8c3562b0da6db1986b9df1424bbfd7872a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ztec/adLDAP/zipball/20e8269d8dbb519e674daf7f567d5f0089c23c00",
-                "reference": "20e8269d8dbb519e674daf7f567d5f0089c23c00",
+                "url": "https://api.github.com/repos/Adldap2/Adldap2/zipball/fd4b2f8c3562b0da6db1986b9df1424bbfd7872a",
+                "reference": "fd4b2f8c3562b0da6db1986b9df1424bbfd7872a",
                 "shasum": ""
             },
             "require": {
                 "ext-ldap": "*",
-                "php": ">=5.2.4"
+                "php": ">=5.4.26"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "phpunit/phpunit": "4.6.*"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "adLDAP": "lib/"
+                "psr-4": {
+                    "Adldap\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "GNU"
+                "LGPL-2.1"
             ],
             "authors": [
                 {
-                    "name": "Richard Hyland",
-                    "email": "adldap@richardhyland.com",
+                    "name": "Steve Bauman",
+                    "email": "steven_bauman@outlook.com",
                     "role": "Developer"
                 }
             ],
-            "description": "adLDAP, low-level library to query Active directory",
-            "homepage": "http://adldap.sourceforge.net",
+            "description": "A PHP LDAP Library for Active Directory Manipulation",
             "keywords": [
                 "active directory",
                 "ldap",
                 "windows"
             ],
-            "time": "2012-11-02 02:12:46"
+            "time": "2015-08-14 15:02:05"
         },
         {
             "name": "symfony/event-dispatcher",

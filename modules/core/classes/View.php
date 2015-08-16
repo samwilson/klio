@@ -31,6 +31,7 @@ class View
             session_start();
         }
         $this->data['alerts'] = Arr::get($_SESSION, 'alerts', array());
+        $_SESSION['alerts'] = array();
     }
 
     public function __set($name, $value)
