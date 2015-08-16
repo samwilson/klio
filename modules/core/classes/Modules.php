@@ -74,7 +74,6 @@ class Modules
     public function fire($event)
     {
         foreach ($this->getPaths() as $mod) {
-            
         }
     }
 }

@@ -85,5 +85,4 @@ class View
             $this->data['alerts'][] = $msg;
         }
     }
-
 }

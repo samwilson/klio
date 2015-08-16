@@ -57,5 +57,4 @@ class Record extends \Klio\Controller
             header("Location:".$this->getBaseUrl()."/record/$tableName/$pkVal");
         }
     }
-
 }

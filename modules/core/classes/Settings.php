@@ -38,5 +38,4 @@ class Settings
         }
         throw new \Exception("Setting not found: '$name' in:<br />" . join('<br />', $tried));
     }
-
 }

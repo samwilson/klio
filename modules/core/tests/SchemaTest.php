@@ -27,10 +27,10 @@ class SchemaTest extends KlioTestCase
                 . ')';
         $this->db->query($sql);
         $this->db->query(
-                "ALTER TABLE `test_table`"
-                . " ADD FOREIGN KEY ( `type_id` )"
-                . " REFERENCES `test_types` (`id`)"
-                . " ON DELETE CASCADE ON UPDATE CASCADE;"
+            "ALTER TABLE `test_table`"
+            . " ADD FOREIGN KEY ( `type_id` )"
+            . " REFERENCES `test_types` (`id`)"
+            . " ON DELETE CASCADE ON UPDATE CASCADE;"
         );
     }
 
@@ -43,7 +43,9 @@ class SchemaTest extends KlioTestCase
 
         // That test_table references test_types
         $testTable = $this->db->getTable('test_table');
-        $this->assertEquals('test_types', array_pop($testTable->getReferencedTables(true))->getName());
+        $referencedTables = $testTable->getReferencedTables(true);
+        $firstReferencedTable = array_pop($referencedTables);
+        $this->assertEquals('test_types', $firstReferencedTable->getName());
 
         $typeTable = $this->db->getTable('test_types');
         $this->assertEquals('test_table', array_pop($typeTable->getReferencingTables())->getName());
