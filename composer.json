@@ -9,7 +9,7 @@
     "require": {
         "twig/twig": "1.*",
         "yohang/calendr": "1.*",
-        "adldap/adldap": "*",
+        "adldap2/adldap2": "^5.0",
         "wp-cli/php-cli-tools": "*",
         "symfony/event-dispatcher": "2.6.*"
     },

@@ -7,9 +7,13 @@ php:
   - 5.6
   - hhvm
 
-script:
-  - $TRAVIS_BUILD_DIR/vendor/bin/phpunit
-  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --report=full --standard=PSR2 modules/*/classes modules/*/tests
+addons:
+  apt:
+    packages:
+      - php5-ldap
+
+before_install:
+  - echo "extension = ldap.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 before_script:
   - mysql -e 'create database klio_test;'
@@ -17,3 +21,7 @@ before_script:
 install:
   - composer install
   - echo "<?php \$database_config = array('database'=>'klio','username'=>'root','password'=>'');" >> $TRAVIS_BUILD_DIR/config.php
+
+script:
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpunit
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --report=full --standard=PSR2 modules/*/classes modules/*/tests
