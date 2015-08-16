@@ -29,6 +29,11 @@ class Modules
         return $out;
     }
 
+    /**
+     * List all modules' files in a directory.
+     * @param string $dir The directory
+     * @return string[]
+     */
     public function listDir($dir)
     {
         $out = array();
