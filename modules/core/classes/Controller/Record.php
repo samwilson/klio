@@ -53,7 +53,9 @@ class Record extends \Klio\Controller
         } else {
             // Otherwise, create a new one.
             $pkVal = $table->saveRecord($_POST, $recordId);
+            $this->getView('record.html')->message('success', "Record saved.", true);
             header("Location:".$this->getBaseUrl()."/record/$tableName/$pkVal");
         }
     }
+
 }

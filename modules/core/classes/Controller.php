@@ -38,20 +38,10 @@ class Controller
         return $this->baseDir;
     }
 
-//    public function setBaseDir($baseDir)
-//    {
-//        $this->baseDir = $baseDir;
-//    }
-
     public function getBaseUrl()
     {
         return $this->baseUrl;
     }
-
-//    public function setBaseUrl($baseUrl)
-//    {
-//        $this->baseUrl = $baseUrl;
-//    }
 
     /**
      * Get a View object for a given template.
