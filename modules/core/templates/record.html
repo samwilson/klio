@@ -96,14 +96,13 @@
 {% for refTab in table.referencingTables %}
 
 <div class="referencing-table">
-<h2>{{ refTab.name }}</h2>
+    <h2>{{ refTab.getTitle }}</h2>
 
-{{refTab.countRecords}}
+    {{refTab.countRecords}} Records.
 
-{% if refTab.countRecords < 10 %}
-    {% include "table.html" with {'table': refTab} %}
-{% endif %}
-
+    {% if refTab.countRecords < 10 %}
+        {% include "data_table.html" with {'table': refTab} %}
+    {% endif %}
 
 </div><!-- .referencing-table -->
 {% endfor %}
