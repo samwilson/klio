@@ -48,7 +48,9 @@ class SchemaTest extends KlioTestCase
         $this->assertEquals('test_types', $firstReferencedTable->getName());
 
         $typeTable = $this->db->getTable('test_types');
-        $this->assertEquals('test_table', array_pop($typeTable->getReferencingTables())->getName());
+        $referencingTables = $typeTable->getReferencingTables();
+        $firstReferencingTable = array_pop($referencingTables);
+        $this->assertEquals('test_table', $firstReferencingTable->getName());
     }
 
     /**
