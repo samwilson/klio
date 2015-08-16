@@ -15,7 +15,7 @@ before_install:
   - echo "extension = ldap.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 before_script:
-  - mysql -e 'create database klio_test;'
+  - mysql -e 'create database klio;'
 
 install:
   - composer install
