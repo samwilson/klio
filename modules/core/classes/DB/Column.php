@@ -5,6 +5,12 @@ namespace Klio\DB;
 class Column
 {
 
+    const EVENT_HAS_PERMISSION = 'db.column.has_permission';
+    const PERM_READ = 'read';
+    const PERM_CREATE = 'create';
+    const PERM_UPDATE = 'update';
+    const PERM_DELETE = 'delete';
+
     /**
      * @var Webdb_DBMS_Table The table to which this column belongs.
      */
@@ -103,45 +109,64 @@ class Column
         }
 
         // DB user privileges
-        $this->dbUserPrivileges = $info->Privileges;
-    }
-
-    public function can($perm)
-    {
-        return $this->dbUserCan($perm) && $this->appUserCan($perm);
+        $this->dbUserPrivileges = array();
+        $privMap = array(
+            'select' => self::PERM_READ,
+            'insert' => self::PERM_CREATE,
+            'update' => self::PERM_UPDATE,
+            'delete' => self::PERM_DELETE,
+        );
+        foreach (explode(',', $info->Privileges) as $priv) {
+            if (isset($privMap[$priv])) {
+                $this->dbUserPrivileges[] = $privMap[$priv];
+            }
+        }
     }
 
     /**
-     * Check that the current user can edit this column. To be overridden by modules.
+     * Can the requested action be performed?
      *
+     * @param string $action
      * @return boolean
      */
-    private function appUserCan($priv_type)
+    public function hasPermission($action)
     {
-        return true;
+        // If the database user can't do something, then it can't be done.
+        $dbUserCan = $this->dbUserHasPermission($action);
+        if (!$dbUserCan) {
+            return false;
+        }
+        $event = new \Klio\Event();
+        $event->column = $this;
+        $event->action = $action;
+        $event->permission = $dbUserCan;
+        \Klio\App::dispatch(self::EVENT_HAS_PERMISSION, $event);
+        return $event->permission;
     }
 
     /**
      * Find out whether the database user (as opposed to the application user)
      * has any of the given privileges on this column.
      *
-     * @param $privilege string The comma-delimited list of privileges to check.
+     * @param $action string The permission action to check.
      * @return boolean
      */
-    public function dbUserCan($privilege)
+    protected function dbUserHasPermission($action)
     {
         $db_privs = array('select', 'update', 'insert', 'delete');
-        if (!in_array($privilege, $db_privs)) {
+        if (!in_array($action, $db_privs)) {
+            // Don't check permissions that don't apply.
             return true;
         }
-        $has_priv = false;
-        $privs = explode(',', $privilege);
-        foreach ($privs as $priv) {
-            if (strpos($this->dbUserPrivileges, $priv) !== false) {
-                $has_priv = true;
-            }
-        }
-        return $has_priv;
+        return in_array($action, $this->dbUserPrivileges);
+//        $has_priv = false;
+//        $privs = explode(',', $action);
+//        foreach ($privs as $priv) {
+//            if (strpos($this->dbUserPrivileges, $priv) !== false) {
+//                $has_priv = true;
+//            }
+//        }
+//        return $has_priv;
     }
 
     /**

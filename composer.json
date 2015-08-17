@@ -11,10 +11,12 @@
         "yohang/calendr": "1.*",
         "adldap2/adldap2": "^5.0",
         "wp-cli/php-cli-tools": "*",
-        "symfony/event-dispatcher": "2.6.*"
+        "symfony/event-dispatcher": "2.*",
+        "aura/session": "2.*",
+        "hautelook/phpass": "^0.3.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "4.5.*",
-        "squizlabs/php_codesniffer": "2.3.*"
+        "phpunit/phpunit": "4.*",
+        "squizlabs/php_codesniffer": "2.*"
     }
 }

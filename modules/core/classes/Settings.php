@@ -26,6 +26,7 @@ class Settings
         $settingsFiles = $modules->listFiles('settings.php');
         $localSettings = realpath($this->baseDir . '/settings.php');
         if ($localSettings) {
+            // Only add /settings.php if it exists.
             $settingsFiles = array_merge(array($localSettings), $settingsFiles);
         }
         foreach ($settingsFiles as $path) {

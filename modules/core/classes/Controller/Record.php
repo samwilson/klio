@@ -20,6 +20,12 @@ class Record extends \Klio\Controller
         if (!$table) {
             throw new \Exception("The '$tableName' table was not found.");
         }
+//        if (!$recordId && !$table->can(\Klio\DB\Column::PERM_CREATE)) {
+//            throw new \Exception("You are not allowed to create " . $table->getTitle() . " records.");
+//        }
+//        if ($recordId && !$table->can(\Klio\DB\Column::PERM_UPDATE)) {
+//            throw new \Exception("You are not allowed to update " . $table->getTitle() . " records.");
+//        }
         $view->table = $table;
         $view->columns = $table->getColumns();
         foreach ($table->getColumns() as $col) {

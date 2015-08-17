@@ -5,6 +5,8 @@ namespace Klio;
 class View
 {
 
+    const EVENT_INIT = 'view.init';
+
     /** @var array */
     private $data = array();
 
@@ -32,6 +34,9 @@ class View
         }
         $this->data['alerts'] = Arr::get($_SESSION, 'alerts', array());
         $_SESSION['alerts'] = array();
+
+        $event = new Event(['view' => $this]);
+        App::dispatch(self::EVENT_INIT, $event);
     }
 
     public function __set($name, $value)
@@ -58,6 +63,12 @@ class View
             'strct_variables' => true
         ));
         $twig->addExtension(new \Twig_Extension_Debug());
+
+        // Add titlecase filter.
+        $titlecase_filter = new \Twig_SimpleFilter('titlecase', '\\Klio\\Text::titlecase');
+        $twig->addFilter($titlecase_filter);
+
+        // Render.
         $string = $twig->render($this->template, $this->data);
         if (!$return) {
             echo $string;

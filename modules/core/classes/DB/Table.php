@@ -345,14 +345,17 @@ class Table
         $pk_column = $this->getPkColumn();
         $pk_name = (!$pk_column) ? 'id' : $pk_column->getName();
         $sql = "SELECT `" . join('`, `', array_keys($this->getColumns())) . "` "
-            . "FROM `" . $this->getName() . "` "
-            . "WHERE `$pk_name` = :$pk_name "
-            . "LIMIT 1";
-        //$this->database->setFetchMode(\PDO::FETCH_ASSOC);
-        $record = $this->database->query($sql, array($pk_name => $id), '\Klio\DB\Record', array($this));
+            . " FROM `" . $this->getName() . "` "
+            . " WHERE `$pk_name` = :$pk_name "
+            . " LIMIT 1";
+
+        // Determine class of resulting Record.
+        $specificRecordClass = '\\Klio\\DB\\Records\\' . \Klio\Text::camelcase($this->getName());
+        $recordClassName = (class_exists($specificRecordClass)) ? $specificRecordClass : '\\Klio\\DB\\Record';
+
+        // Run query.
+        $record = $this->database->query($sql, array($pk_name => $id), $recordClassName, array($this));
         return $record->fetch();
-        //$this->database->setFetchMode(\PDO::FETCH_OBJ);
-        //return new Row($row->fetch());
     }
 
     public function getDefaultRow()
@@ -681,7 +684,7 @@ class Table
     public function can($perm)
     {
         foreach ($this->getColumns() as $column) {
-            if ($column->can($perm)) {
+            if ($column->hasPermission($perm)) {
                 return true;
             }
         }

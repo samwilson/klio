@@ -12,6 +12,6 @@ $ldap = array(
     'use_ssl' => '',
     'use_tls' => '',
     'recursive_groups' => '',
-    'ad_port' => '',
+    //'ad_port' => \adLDAP\adLDAP::ADLDAP_LDAP_PORT,
     'sso' => '',
 );

@@ -5,6 +5,13 @@ namespace Klio;
 class Controller
 {
 
+    const EVENT_BEFORE = 'controller.before';
+    const EVENT_AFTER = 'controller.after';
+    const EVENT_GET_VIEW = 'controller.get_view';
+
+    /** @var string The session variable under which to store the list of grouped table names. */
+    const SESSION_GROUPED_TABLES = 'controller.grouped_tables';
+
     /** @var string */
     private $baseDir;
 
@@ -22,6 +29,16 @@ class Controller
         $this->baseDir = $baseDir;
         $this->baseUrl = $baseUrl;
         $this->settings = new \Klio\Settings($this->getBaseDir());
+    }
+
+    public function before()
+    {
+        \Klio\App::dispatch(self::EVENT_BEFORE, new Event(['controller' => $this]));
+    }
+
+    public function after()
+    {
+        \Klio\App::dispatch(self::EVENT_AFTER, new Event(['controller' => $this]));
     }
 
     /**
@@ -56,10 +73,15 @@ class Controller
         $view->app_version = App::version();
         $view->app_name = App::name();
         if ($this->db) {
-            $view->tables = $this->db->getTables(true);
+            $tables = App::session()->get(self::SESSION_GROUPED_TABLES);
+            if (!$tables) {
+                App::session()->set(self::SESSION_GROUPED_TABLES, $this->db->getTables(true));
+            }
+            $view->tables = App::session()->get(self::SESSION_GROUPED_TABLES);
         }
         $mods = new Modules($this->baseDir);
         $view->modulePaths = $mods->getPaths();
+        \Klio\App::dispatch(self::EVENT_GET_VIEW, new Event(['controller' => $this, 'view' => $view]));
         return $view;
     }
 

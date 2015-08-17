@@ -51,13 +51,13 @@
         </header>
 
         {% if alerts %}
-        <div class="panel">
+        <div class="">
             {% for alert in alerts %}
             <div data-alert class="alert-box {{ alert.type }}">
                 {{alert.message|raw}} <a href="#" class="close">&times;</a>
             </div>
             {% endfor %}
-        <div>
+        </div>
         {% endif %}
 
         <div id="content">

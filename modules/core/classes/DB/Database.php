@@ -8,7 +8,7 @@ class Database
     /**
      * This event is triggered when the list of table names is being requested from the database.
      */
-    const GET_TABLE_NAMES_EVENT = 'db.database.get_table_names';
+    const EVENT_GET_TABLE_NAMES = 'db.database.get_table_names';
 
     /** @var array|string */
     protected $table_names;
@@ -45,16 +45,15 @@ class Database
             }
         }
 
-//        if (!$this->getTable('changesets')) {
-//            $this->query(
-//                "CREATE TABLE changesets ("
-//                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
-//                . " date_and_time TIMESTAMP NOT NULL,"
-//                . " user_id INT(5) NULL DEFAULT NULL,"
-//                . " comments VARCHAR(140) NULL DEFAULT NULL"
-//                . ");"
-//            );
-//        }
+        if (!$this->getTable('settings')) {
+            $this->query(
+                "CREATE TABLE settings ("
+                . " id INT(10) AUTO_INCREMENT PRIMARY KEY,"
+                . " name VARCHAR(100) NOT NULL UNIQUE,"
+                . " value TEXT NULL DEFAULT NULL"
+                . ");"
+            );
+        }
 //        if (!$this->getTable('changes')) {
 //            $this->query(
 //                "CREATE TABLE changes ("
@@ -71,8 +70,10 @@ class Database
 //                . " ON DELETE CASCADE ON UPDATE CASCADE;"
 //            );
 //        }
-//        $this->table_names = false;
-//        $this->tables = array();
+
+        // Reset; will be rebuilt when requested.
+        $this->table_names = false;
+        $this->tables = array();
     }
 
     public static function getQueries()
@@ -164,11 +165,11 @@ class Database
             }
             //sort($this->table_names);
         }
-        $databaseEvent = new Event($this, $this->table_names);
+        $databaseEvent = new \Klio\Event(['database' => $this, 'table_names' => $this->table_names]);
         if ($trigger) {
-            \Klio\App::dispatch(self::GET_TABLE_NAMES_EVENT, $databaseEvent);
+            \Klio\App::dispatch(self::EVENT_GET_TABLE_NAMES, $databaseEvent);
         }
-        return $databaseEvent->data;
+        return $databaseEvent->table_names;
     }
 
     public function getTables($grouped = false)
@@ -176,17 +177,12 @@ class Database
         foreach ($this->getTableNames() as $tableName) {
             $this->getTable($tableName);
         }
-        if (!$grouped) {
+        if (!$grouped || empty($this->tables)) {
             return $this->tables;
         }
 
         // Group tables together by common prefixes.
-        if (isset($_SESSION['grouped_table_names'])) {
-            $prefixes = $_SESSION['grouped_table_names'];
-        } else {
-            $prefixes = \Klio\Arr::getPrefixGroups(array_keys($this->tables));
-            $_SESSION['grouped_table_names'] = $prefixes;
-        }
+        $prefixes = \Klio\Arr::getPrefixGroups(array_keys($this->tables));
         $groups = array('Miscellaneous' => $this->tables);
         // Go through each table,
         foreach (array_keys($this->tables) as $table) {
@@ -205,7 +201,7 @@ class Database
 
     /**
      * Get a table object.
-     * @param string $name
+     * @param string $name The table name.
      * @param boolean $trigger Whether to trigger events.
      * @return Table
      */
@@ -215,12 +211,10 @@ class Database
             return false;
         }
         if (!isset($this->tables[$name])) {
-            $specificTableClass = '\Klio\DB\Table\\' . \Klio\Text::camelcase($name);
+            $specificTableClass = '\\Klio\\DB\\Tables\\' . \Klio\Text::camelcase($name);
             $tableClassName = (class_exists($specificTableClass)) ? $specificTableClass : '\Klio\DB\Table';
             $table = new $tableClassName($this, $name);
-            if ($table->can('read')) {
-                $this->tables[$name] = $table;
-            }
+            $this->tables[$name] = $table;
         }
         return $this->tables[$name];
     }

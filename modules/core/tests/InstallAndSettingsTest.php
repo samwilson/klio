@@ -10,15 +10,15 @@ class InstallAndSettingsTest extends KlioTestCase
      */
     public function install()
     {
-//        $db = $this->getDb();
-//        $this->assertEmpty($db->getTableNames());
-//        $db->install();
-//        $this->assertContains('settings', $db->getTableNames(), 'settings table not found');
+        $db = $this->getDb();
+        $this->assertEmpty($db->getTableNames());
+        $db->install($this->getBaseDir());
+        $this->assertContains('settings', $db->getTableNames(), 'settings table not found');
     }
 
-    /**
-     * @test
-     */
+//    /**
+//     * @test
+//     */
 //    public function settings()
 //    {
 //        $db = $this->getDb();

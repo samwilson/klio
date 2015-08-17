@@ -13,7 +13,7 @@ foreach (explode('/', $_SERVER['PHP_SELF']) as $part) {
         break;
     }
     if (!empty($part)) {
-        $baseurl .= $part.'/';
+        $baseurl .= $part . '/';
     }
 }
 $klio = new \Klio\App(__DIR__, $baseurl);

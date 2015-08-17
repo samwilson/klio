@@ -35,8 +35,10 @@ abstract class KlioTestCase extends \PHPUnit_Framework_TestCase
     protected function cleanDb()
     {
         $db = $this->getDb();
+        $db->query("SET FOREIGN_KEY_CHECKS = 0");
         foreach ($db->getTableNames() as $tbl) {
             $db->query("DROP TABLE $tbl");
         }
+        $db->query("SET FOREIGN_KEY_CHECKS = 1");
     }
 }

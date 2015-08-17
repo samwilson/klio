@@ -11,7 +11,10 @@ class App
     private $baseDir;
 
     /** @var EventDispatcher */
-    public static $eventDispatcher;
+    private static $eventDispatcher;
+
+    /** @var \Aura\Session\Session */
+    private static $session;
 
     /** @var Modules */
     private $modules;
@@ -51,16 +54,17 @@ class App
             }
             $loader->addPsr4('Klio\\', $modClassPath);
 
-            // Module metadata.
-            $eventsFile = realpath($modClassPath . '/../events.php');
-            if ($eventsFile) {
-                $events = require $eventsFile;
-                // Add event listeners.
-                foreach ($events as $event => $listener) {
-                    self::$eventDispatcher->addListener($event, [new $listener(), 'handle']);
-                }
+            // Instantiate the module's main class, so it can do whatever it wants.
+            $moduleMainClass = 'Klio\\'.Text::camelcase($mod);
+            if (class_exists($moduleMainClass)) {
+                new $moduleMainClass($this);
             }
         }
+    }
+
+    public static function addListener($event, $callback)
+    {
+        self::$eventDispatcher->addListener($event, $callback);
     }
 
     public static function dispatch($eventName, $event)
@@ -69,6 +73,20 @@ class App
             self::$eventDispatcher = new EventDispatcher();
         }
         self::$eventDispatcher->dispatch($eventName, $event);
+    }
+
+    /**
+     * Get the session.
+     * @return \Aura\Session\Segment;
+     */
+    public static function session()
+    {
+        if (!self::$session instanceof \Aura\Session\Session) {
+            $session_factory = new \Aura\Session\SessionFactory;
+            $session = $session_factory->newInstance($_COOKIE);
+            self::$session = $session->getSegment(App::name());
+        }
+        return self::$session;
     }
 
     public function getBaseUrl()
@@ -131,7 +149,10 @@ class App
     protected function callControllerMethod($controller, $method, $params)
     {
         try {
+            session_start();
+            $controller->before();
             call_user_func_array(array($controller, $method), $params);
+            $controller->after();
         } catch (\Exception $e) {
             $errorView = $controller->getView('error.html');
             $errorView->title = 'Error';

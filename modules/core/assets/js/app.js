@@ -1,5 +1,7 @@
 $(function () {
 
+    $(".focus-me").focus();
+
     // Filters
     var $addFilter = $("<a class='button default small'>Add new filter</a>");
     $(".filters .columns.submit").append($addFilter);
