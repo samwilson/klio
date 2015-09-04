@@ -18,8 +18,16 @@ $router->addRoute('GET', '/{file:.*\.(?:css|js)}', 'App\Controllers\AssetsContro
 $router->addRoute('GET', '/install', 'App\Controllers\InstallController::install');
 $router->addRoute('POST', '/install', 'App\Controllers\InstallController::run');
 $router->addRoute('GET', '/', 'App\Controllers\HomeController::index');
+
+$router->addRoute('GET', '/login', 'App\Controllers\UsersController::login');
+$router->addRoute('POST', '/login', 'App\Controllers\UsersController::loginPost');
+$router->addRoute('GET', '/logout', 'App\Controllers\UsersController::logout');
+
 $router->addRoute('GET', '/{id:number}', 'App\Controllers\HomeController::view');
 $router->addRoute('GET', '/table/{table}', 'App\Controllers\TableController::view');
+$router->addRoute('GET', '/record/{table}/{id}', 'App\Controllers\RecordController::view');
+$router->addRoute('GET', '/record/{table}/{id}/edit', 'App\Controllers\RecordController::edit');
+$router->addRoute('GET', '/record/{table}/{id}/delete', 'App\Controllers\RecordController::delete');
 
 $dispatcher = $router->getDispatcher();
 $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();

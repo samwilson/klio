@@ -1,6 +1,6 @@
 <?php
 
-namespace WordPress\Tabulate\DB;
+namespace App\DB;
 
 /**
  * The Tabulate 'Grants' is a list of table names, and for each table a record
@@ -118,8 +118,9 @@ class Grants {
 		if ( $table_name instanceof Table ) {
 			$table_name = $table_name->get_name();
 		}
-		$capability = TABULATE_SLUG . '_' . $grant;
-		return current_user_can( $capability, $table_name );
+        $user = 
+        $db = new Database();
+        $db->query('SELECT * FROM grants WHERE user');
 	}
 
 }

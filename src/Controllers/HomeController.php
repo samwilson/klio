@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 class HomeController {
 
     public function index(Request $request, Response $response, array $args) {
-        $db = new \App\DB();
+        $db = new \App\DB\Database();
         $template = new \App\Template('home.twig');
         $template->title = 'Home';
         $template->tables = $db->getTableNames();

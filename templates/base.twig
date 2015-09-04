@@ -12,7 +12,7 @@
 
     <body>
         <main>
-            <nav>
+            <nav class="main">
                 <h1><a href="{{baseurl}}">{{site_title}}</a></h1>
                 <ol>
                     {% for table in tables %}
@@ -21,6 +21,18 @@
                 </ol>
             </nav>
             <div class="content">
+                <nav class="user">
+                    <ul>
+                        {% if user.isAnon %}
+                        <li>
+                            <a href="{{baseurl}}/login">Log in</a>
+                        </li>
+                        <li>
+                            <a href="{{baseurl}}/register">Register</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
                 <h1>
                     {{title}}
                     {% if subtitle %}

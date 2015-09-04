@@ -1,6 +1,6 @@
 <?php
 
-namespace WordPress\Tabulate\DB;
+namespace App\DB;
 
 use WordPress\Tabulate\DB\Database;
 use WordPress\Tabulate\DB\Table;
@@ -107,45 +107,6 @@ class ChangeTracker {
 		if ( ! self::$keep_changeset_open ) {
 			$this->close_changeset();
 		}
-	}
-
-	public static function activate() {
-		global $wpdb;
-		$db = new Database( $wpdb );
-		if ( ! $db->get_table( self::changesets_name() ) ) {
-			$sql = "CREATE TABLE IF NOT EXISTS `" . self::changesets_name() . "` (
-			`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-			`date_and_time` DATETIME NOT NULL,
-			`user_id` BIGINT(20) UNSIGNED NOT NULL,
-			FOREIGN KEY (`user_id`) REFERENCES `{$wpdb->prefix}users` (`ID`),
-			`comment` TEXT NULL DEFAULT NULL
-			);";
-			$wpdb->query( $sql );
-		}
-		if ( ! $db->get_table( self::changes_name() ) ) {
-			$sql = "CREATE TABLE IF NOT EXISTS `" . self::changes_name() . "` (
-			`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-			`changeset_id` INT(10) UNSIGNED NOT NULL,
-			FOREIGN KEY (`changeset_id`) REFERENCES `" . self::changesets_name() . "` (`id`),
-			`change_type` ENUM('field', 'file', 'foreign_key') NOT NULL DEFAULT 'field',
-			`table_name` TEXT(65) NOT NULL,
-			`record_ident` TEXT(65) NOT NULL,
-			`column_name` TEXT(65) NOT NULL,
-			`old_value` LONGTEXT NULL DEFAULT NULL,
-			`new_value` LONGTEXT NULL DEFAULT NULL
-			);";
-			$wpdb->query( $sql );
-		}
-	}
-
-	public static function changesets_name() {
-		global $wpdb;
-		return $wpdb->prefix . TABULATE_SLUG . '_changesets';
-	}
-
-	public static function changes_name() {
-		global $wpdb;
-		return $wpdb->prefix . TABULATE_SLUG . '_changes';
 	}
 
 	/**

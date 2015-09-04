@@ -1,6 +1,6 @@
 {% if column.is_foreign_key %}
 	{% if links %}
-	<a href="{{baseurl}}/record/{{attribute(record, column.get_name)}}">
+	<a href="{{baseurl}}/record/{{column.get_referenced_table.get_name()}}/{{attribute(record, column.get_name)}}">
 		{{ attribute(record, column.get_name~'FKTITLE') }}
 	</a>
 	{% else %}
