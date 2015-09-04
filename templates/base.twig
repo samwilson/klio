@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{title}} :: {{site_title}}</title>
+        <link rel="stylesheet" href="//cdn.rawgit.com/mblode/marx/master/css/marx.min.css">
+        <link rel="stylesheet" type="text/css" href="{{baseurl}}/all.css?ver={{app_version}}" />
+    </head>
+
+    <body>
+        <main>
+            <nav>
+                <h1><a href="{{baseurl}}">{{site_title}}</a></h1>
+                <ol>
+                    {% for table in tables %}
+                    <li><a href="{{baseurl}}/table/{{table}}">{{table|titlecase}}</a></li>
+                    {% endfor %}
+                </ol>
+            </nav>
+            <div class="content">
+                <h1>
+                    {{title}}
+                    {% if subtitle %}
+                        <span class="subtitle">{{subtitle}}</span>
+                    {% endif %}
+                </h1>
+
+                {% if alerts %}
+                    <div class="alerts">
+                        {% for alert in alerts %}
+                            <div class="alert alert-{{alert.type}}">{{alert.message|raw}}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+
+            <footer>
+                {% if mode == 'development' %}
+                    <pre class="queries">{% spaceless %}
+                    {% for query in queries %}{{query}}<br />{% endfor %}
+                    {% endspaceless %}</pre>
+                {% endif %}
+                <a href="https://github.com/samwilson/klio" title="Go to the {{app_title}} homepage" target="_blank">
+                    {{app_title}}
+                </a>
+            </footer>
+        </main>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> 
+        <script src="{{baseurl}}/app.js?ver={{app_version}}"></script>
+    </body>
+</html>

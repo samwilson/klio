@@ -1,0 +1,31 @@
+{% if column.is_foreign_key %}
+	{% if links %}
+	<a href="{{baseurl}}/record/{{attribute(record, column.get_name)}}">
+		{{ attribute(record, column.get_name~'FKTITLE') }}
+	</a>
+	{% else %}
+		{{ attribute(record, column.get_name~'FKTITLE') }}
+	{% endif %}
+
+{% elseif column.is_boolean %}
+{% if attribute(record, column.get_name) is sameas(true) %}
+Yes
+{% elseif attribute(record, column.get_name) is sameas(false) %}
+No
+{% else %}
+<!-- Null -->
+{% endif %}
+
+ {% elseif column.get_type=='date' %}
+{{ attribute(record, column.get_name)}}
+
+{% elseif column.get_type=='time' %}
+{{ attribute(record, column.get_name) }}
+
+{% elseif column.get_type=='point' %}
+{{ attribute(record, column.get_name) }}
+
+{% else %}
+{{ attribute(record, column.get_name) }}
+
+{% endif %}

@@ -1,0 +1,15 @@
+{%extends "base.twig"%}
+
+{% block content %}
+    <article>
+        <p>
+            Welcome to {{site_title}}.
+            Click the 'Install' button at right to install or upgrade the application.
+        </p>
+    </article>
+    <aside>
+        <form action="{{baseurl}}/install" method="post">
+            <input type="submit" value="Install" />
+        </form>
+    </aside>
+{%endblock%}
