@@ -23,7 +23,7 @@ class Template {
         $this->data['mode'] = App::mode();
         $this->data['baseurl'] = App::baseurl();
         $this->data['site_title'] = App::env('SITE_TITLE', 'A Swidau Site');
-        $this->data['user'] = new DB\User();
+        //$this->data['user'] = new DB\User();
 
         if (!isset($_SESSION)) {
             session_start();

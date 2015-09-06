@@ -150,33 +150,33 @@ class Database {
     }
 
     public function install() {
-        $db->query("CREATE TABLE IF NOT EXISTS `groups` ("
+        $this->query("CREATE TABLE IF NOT EXISTS `groups` ("
                 . " `id` INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `title` VARCHAR(100) NOT NULL UNIQUE"
                 . ");");
-        $db->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES (1,'Administrators'), (2,'General Public');");
-        $db->query("CREATE TABLE IF NOT EXISTS users ("
+        $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES (1,'Administrators'), (2,'General Public');");
+        $this->query("CREATE TABLE IF NOT EXISTS users ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `username` VARCHAR(100) NOT NULL UNIQUE,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`) "
                 . ")");
-        $db->query("INSERT IGNORE INTO users (`id`,`username`,`group`) VALUES (1,'admin',1), (2,'anonymous',2);");
-        $db->query("CREATE TABLE IF NOT EXISTS grants ("
+        $this->query("INSERT IGNORE INTO users (`id`,`username`,`group`) VALUES (1,'admin',1), (2,'anonymous',2);");
+        $this->query("CREATE TABLE IF NOT EXISTS grants ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`),"
                 . " `grant` VARCHAR(50) NOT NULL,"
                 . " `table_name` VARCHAR(65) NULL "
                 . ")");
-        $db->query("CREATE TABLE IF NOT EXISTS `changesets` ("
+        $this->query("CREATE TABLE IF NOT EXISTS `changesets` ("
                 . " `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                 . " `date_and_time` DATETIME NOT NULL,"
                 . " `user` INT(5) UNSIGNED NOT NULL,"
                 . "        FOREIGN KEY (`user`) REFERENCES `users` (`id`),"
                 . " `comment` TEXT NULL DEFAULT NULL"
                 . " );");
-        $db->query("CREATE TABLE IF NOT EXISTS `changes` ("
+        $this->query("CREATE TABLE IF NOT EXISTS `changes` ("
                 . " `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                 . " `changeset` INT(10) UNSIGNED NOT NULL,"
                 . "             FOREIGN KEY (`changeset`) REFERENCES `changesets` (`id`),"

@@ -13,6 +13,7 @@ $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASS']);
  * Routes.
  */
 $router = new League\Route\RouteCollection;
+$router->setStrategy(new App\RoutingStrategy());
 
 $router->addRoute('GET', '/{file:.*\.(?:css|js)}', 'App\Controllers\AssetsController::css');
 $router->addRoute('GET', '/install', 'App\Controllers\InstallController::install');
