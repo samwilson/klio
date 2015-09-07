@@ -13,9 +13,9 @@ $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASS']);
  * Routes.
  */
 $router = new League\Route\RouteCollection;
-$router->setStrategy(new App\RoutingStrategy());
+//$router->setStrategy(new App\RoutingStrategy());
 
-$router->addRoute('GET', '/{file:.*\.(?:css|js)}', 'App\Controllers\AssetsController::css');
+//$router->addRoute('GET', '/{file:[^/]*}.{ext:(?:css|js)}', 'App\Controllers\AssetsController::asset');
 $router->addRoute('GET', '/install', 'App\Controllers\InstallController::install');
 $router->addRoute('POST', '/install', 'App\Controllers\InstallController::run');
 $router->addRoute('GET', '/', 'App\Controllers\HomeController::index');
@@ -36,10 +36,10 @@ try {
     $response = $dispatcher->dispatch($request->getMethod(), $request->getPathInfo());
 } catch (\League\Route\Http\Exception\NotFoundException $notFound) {
     $response = new \Symfony\Component\HttpFoundation\Response('Not Found', 404);
-} catch (\Exception $e) {
-    $template = new \App\Template('base.twig');
-    $template->title = 'Error';
-    $template->message('error', $e->getMessage());
-    $response = new \Symfony\Component\HttpFoundation\Response($template->render());
+//} catch (\Exception $e) {
+//    $template = new \App\Template('base.twig');
+//    $template->title = 'Error';
+//    $template->message('error', $e->getMessage());
+//    $response = new \Symfony\Component\HttpFoundation\Response($template->render());
 }
 $response->send();

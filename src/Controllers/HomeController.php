@@ -12,6 +12,7 @@ class HomeController {
         $template = new \App\Template('home.twig');
         $template->title = 'Home';
         $template->tables = $db->getTableNames();
+        $template->user = new \App\DB\User();
         $response->setContent($template->render());
         return $response;
     }

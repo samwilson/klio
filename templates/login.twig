@@ -4,12 +4,12 @@
     <form action="" method="post">
         <p>
             <label>
-                Username: <input type="text" name="username" />
+                Username: <input type="text" name="username" class="focus-me" required="required" />
             </label>
             <label>
-                Password: <input type="password" name="password" />
+                Password: <input type="password" name="password" required="required" />
             </label>
-            <input type="submit" value="Log in" />
+            <button>Log in</button>
         </p>
     </form>
 {% endblock %}

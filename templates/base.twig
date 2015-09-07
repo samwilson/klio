@@ -6,14 +6,15 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{{title}} :: {{site_title}}</title>
-        <link rel="stylesheet" href="//cdn.rawgit.com/mblode/marx/master/css/marx.min.css">
-        <link rel="stylesheet" type="text/css" href="{{baseurl}}/all.css?ver={{app_version}}" />
+        <link rel="stylesheet" type="text/css" href="{{baseurl}}/assets/jquery-ui-1.11.4.css" />
+        <!--link rel="stylesheet" type="text/css" href="{{baseurl}}/assets/jquery-ui-timepicker-addon.min.css" /-->
+        <link rel="stylesheet" type="text/css" href="{{baseurl}}/assets/all.css?ver={{app_version}}" />
     </head>
 
     <body>
         <main>
             <nav class="main">
-                <h1><a href="{{baseurl}}">{{site_title}}</a></h1>
+                <h2><a href="{{baseurl}}">{{site_title}}</a></h2>
                 <ol>
                     {% for table in tables %}
                     <li><a href="{{baseurl}}/table/{{table}}">{{table|titlecase}}</a></li>
@@ -30,6 +31,13 @@
                         <li>
                             <a href="{{baseurl}}/register">Register</a>
                         </li>
+                        {% else %}
+                        <li>
+                            <a href="#">{{user.getName()}}</a>
+                        </li>
+                        <li>
+                            <a href="{{baseurl}}/logout">Log out</a>
+                        </li>
                         {% endif %}
                     </ul>
                 </nav>
@@ -40,16 +48,38 @@
                     {% endif %}
                 </h1>
 
-                {% if alerts %}
-                    <div class="alerts">
-                        {% for alert in alerts %}
-                            <div class="alert alert-{{alert.type}}">{{alert.message|raw}}</div>
-                        {% endfor %}
-                    </div>
+                {% if table %}
+                <nav class="tabs">
+                    <ul>
+                        <li {% if active_tab=='search' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/table/{{table.get_name()}}">Search</a>
+                        </li>
+                        <li {% if active_tab=='create' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}">Create</a>
+                        </li>
+                        <li {% if active_tab=='edit' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}">Edit</a>
+                        </li>
+                        <li {% if active_tab=='import' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}/import">Import</a>
+                        </li>
+                        <li {% if active_tab=='calendar' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}/calendar">Calendar</a>
+                        </li>
+                    </ul>
+                </nav>
                 {% endif %}
 
-                {% block content %}
-                {% endblock %}
+                <div class="page">
+                    {% if alerts %}
+                        <div class="alerts">
+                            {% for alert in alerts %}
+                                <div class="alert alert-{{alert.type}}">{{alert.message|raw}}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                </div>
             </div>
 
             <footer>
@@ -63,7 +93,10 @@
                 </a>
             </footer>
         </main>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> 
-        <script src="{{baseurl}}/app.js?ver={{app_version}}"></script>
+        <script type="text/javascript" src="{{baseurl}}/assets/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="{{baseurl}}/assets/jquery-ui-1.11.4.min.js"></script>
+        <script type="text/javascript" src="{{baseurl}}/assets/jquery-ui-timepicker-addon.min.js"></script>
+        <script type="text/javascript" src="{{baseurl}}/assets/jquery-maskedinput-1.4.1.min.js"></script>
+        <script type="text/javascript" src="{{baseurl}}/assets/app.js?ver={{app_version}}"></script>
     </body>
 </html>

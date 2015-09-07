@@ -28,11 +28,15 @@ class App {
         return rtrim($baseurl, '/');
     }
 
+    public static function url($path = '') {
+        return self::baseurl() . '/' . ltrim($path, '/');
+    }
+
     public static function mode() {
         return self::env('MODE', 'production');
     }
 
-    public static function env($name, $default) {
+    public static function env($name, $default = null) {
         $env = getenv($name);
         return ($env) ? $env : $default;
     }

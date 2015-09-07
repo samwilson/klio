@@ -18,7 +18,7 @@ class InstallController {
     public function run(Request $request, Response $response, array $args) {
         $db = new \App\DB\Database();
         $db->install();
-        return new RedirectResponse(\App\App::baseurl());
+        return new RedirectResponse(\App\App::url());
     }
 
 }

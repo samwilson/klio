@@ -9,7 +9,7 @@ use App\DB\Database;
 class TableController extends Base {
 
     private function getTable($tableName) {
-        $db = new Database();
+        $db = $this->getDb();
         $table = $db->getTable($tableName);
         if (!$table) {
             throw new \Exception("Table '$table' not found.");
@@ -52,6 +52,7 @@ class TableController extends Base {
         $template->controller = 'table';
         $template->table = $table;
         $template->tables = $table->get_database()->getTableNames();
+        $template->user = new \App\DB\User();
         $template->columns = $table->get_columns();
         $template->operators = $table->get_operators();
         $template->filters = $filters;

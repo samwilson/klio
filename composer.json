@@ -8,7 +8,7 @@
     "require": {
         "twig/twig": "1.*",
         "erusev/parsedown": "1.*",
-        "hautelook/phpass": "dev-master",
+        "adldap2/adldap2": "5.*",
         "yohang/calendr": "1.*",
         "phayes/geophp": "1.*",
         "vlucas/phpdotenv": "2.*",

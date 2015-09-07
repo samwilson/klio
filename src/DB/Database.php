@@ -154,10 +154,11 @@ class Database {
                 . " `id` INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `title` VARCHAR(100) NOT NULL UNIQUE"
                 . ");");
-        $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES (1,'Administrators'), (2,'General Public');");
+        $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES (".User::ADMIN_GROUP_ID.",'Administrators'), (".User::ANON_GROUP_ID.",'Anonymous users');");;
         $this->query("CREATE TABLE IF NOT EXISTS users ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `username` VARCHAR(100) NOT NULL UNIQUE,"
+                . " `password` VARCHAR(255) NOT NULL,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`) "
                 . ")");
