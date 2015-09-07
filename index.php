@@ -26,6 +26,7 @@ $router->addRoute('GET', '/logout', 'App\Controllers\UsersController::logout');
 
 $router->addRoute('GET', '/{id:number}', 'App\Controllers\HomeController::view');
 $router->addRoute('GET', '/table/{table}', 'App\Controllers\TableController::view');
+$router->addRoute('GET', '/record/{table}', 'App\Controllers\RecordController::edit');
 $router->addRoute('GET', '/record/{table}/{id}', 'App\Controllers\RecordController::view');
 $router->addRoute('GET', '/record/{table}/{id}/edit', 'App\Controllers\RecordController::edit');
 $router->addRoute('GET', '/record/{table}/{id}/delete', 'App\Controllers\RecordController::delete');
@@ -36,10 +37,12 @@ try {
     $response = $dispatcher->dispatch($request->getMethod(), $request->getPathInfo());
 } catch (\League\Route\Http\Exception\NotFoundException $notFound) {
     $response = new \Symfony\Component\HttpFoundation\Response('Not Found', 404);
-//} catch (\Exception $e) {
-//    $template = new \App\Template('base.twig');
-//    $template->title = 'Error';
-//    $template->message('error', $e->getMessage());
-//    $response = new \Symfony\Component\HttpFoundation\Response($template->render());
+} catch (\Exception $e) {
+    $template = new \App\Template('error.twig');
+    $template->title = 'Error';
+    $template->message('error', $e->getMessage());
+    
+    $template->e = $e;
+    $response = new \Symfony\Component\HttpFoundation\Response($template->render());
 }
 $response->send();

@@ -21,7 +21,7 @@ nav.main ol a { display:block; width:100%; padding:0.2em 0.45em; line-height:1em
 nav.main ol a:hover { background-color: #9eb5cb; text-decoration:none; color:black }
 
 /** Top navigation. */
-nav.user { position:absolute; top:0; right:0.7em }
+nav.user { position:absolute; top:0.5em; right:0.7em }
 nav.user li { padding:0; display:inline-block; margin:0 0.7em }
 nav.user a { padding:0 }
 
@@ -37,14 +37,13 @@ div.page { padding:1em 0.4em; border-top:1px solid #ccc; }
 
 /** Filters. */
 .filters table { border:0; clear:both }
-.filters td { vertical-align:top }
 
 /** Tables. */
 table { border:1px solid #b1b5ba; border-collapse:collapse }
 td, th { padding:0.1em 0.2em; text-align:left }
-th { background-color:#dfe3e8; border:1px solid #b1b5ba }
+th { background-color:#dfe3e8; border:1px solid #b1b5ba; vertical-align:bottom }
 th.selected { background-color:#aaa }
-td { border:1px solid #dadcdd }
+td { border:1px solid #dadcdd; vertical-align:top }
 
 /** Tabs */
 .tabs { padding:0; margin:0; clear:both; width:100%; height:2em }

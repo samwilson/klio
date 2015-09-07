@@ -13,19 +13,20 @@ class RecordController extends Base {
      * @return \WordPress\Tabulate\Template
      */
     private function get_template($table) {
-        $template = new \App\Template('record/admin.html');
+        $template = new \App\Template('record/admin.twig');
         $template->table = $table;
         $template->controller = 'record';
         return $template;
     }
 
-    public function view(Request $request, Response $response, array $args) {
+    public function edit(Request $request, Response $response, array $args) {
         // Get database and table.
         $db = new Database();
         $table = $db->getTable($args['table']);
 
         // Give it all to the template.
         $template = $this->get_template($table);
+        $template->tables = $db->getTableNames();
         if (isset($args['ident'])) {
             $template->record = $table->get_record($args['ident']);
             // Check permission.
@@ -36,8 +37,8 @@ class RecordController extends Base {
         if (!isset($template->record) || $template->record === false) {
             $template->record = $table->get_default_record();
             // Check permission.
-            if (!Grants::current_user_can(Grants::READ, $table->get_name())) {
-                $template->add_notice('error', 'You do not have permission to read records in this table.');
+            if (!$this->user->can(Grants::READ, $table->get_name())) {
+                $template->message(\App\Template::WARNING, 'You do not have permission to read records in this table.');
             }
             // Add query-string values.
             if (isset($args['defaults'])) {
@@ -49,15 +50,13 @@ class RecordController extends Base {
             $template->add_notice('error', "This table can not be updated.");
         }
 
-        // Enable postboxes (for the history and related tables' boxen).
-        wp_enqueue_script('dashboard');
-
         // Return to URL.
         if (isset($args['return_to'])) {
             $template->return_to = $args['return_to'];
         }
 
-        return $template->render();
+        $response->setContent($template->render());
+        return $response;
     }
 
     public function save($args) {

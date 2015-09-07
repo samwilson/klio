@@ -71,7 +71,13 @@ class User {
     }
 
     public function can($grant, $table) {
-        
+        $db = new Database();
+        $sql = 'SELECT 1'
+                . ' FROM `grants`'
+                . '   JOIN `groups` ON `grants`.`group` = `groups`.`id`'
+                . '   JOIN `users` ON `groups`.id = `users`.`group`'
+                . ' WHERE `users`.`id` = :user_id AND `grants`.`grant` = :grant';
+        return $db->query($sql, ['user_id' => self::$data->id, 'grant' => $grant])->fetchColumn();
     }
 
 }

@@ -44,7 +44,7 @@
 			</td>
 			{% for column in table.get_columns %}
 			<td class="type-{{column.get_type()}} {% if column.is_foreign_key %}is-foreign-key{% endif %}">
-				{% include 'field/view.html' %}
+				{% include 'field/view.twig' %}
 			</td>
 			{% endfor %}
 		</tr>
