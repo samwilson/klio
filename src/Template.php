@@ -12,12 +12,16 @@ class Template {
     /** @var string */
     private $template = false;
 
+    /** @var string[] */
+    private $paths = array();
+
     const INFO = 'info';
     const WARNING = 'warning';
     const ERROR = 'error';
 
     public function __construct($template) {
         $this->template = $template;
+        $this->paths = ['templates'];
         $this->data['app_title'] = App::name() . ' ' . App::version();
         $this->data['app_version'] = App::version();
         $this->data['mode'] = App::mode();
@@ -35,12 +39,22 @@ class Template {
         $this->data[$name] = $value;
     }
 
+    function getPaths() {
+        return $this->paths;
+    }
+
+    function addPath($path) {
+        $this->paths[$path] = $path;
+    }
+
     public function render($echo = false) {
         $this->queries = Database::getQueries();
 
         // Load template directories.
         $loader = new \Twig_Loader_Filesystem();
-        $loader->addPath('templates');
+        foreach ($this->getPaths() as $path) {
+            $loader->addPath($path);
+        }
 
         // Set up Twig.
         $twig = new \Twig_Environment($loader, array(

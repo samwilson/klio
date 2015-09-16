@@ -95,7 +95,7 @@ class Database {
         return $stmt;
     }
 
-    public function getTableNames() {
+    public function getTableNames($checkGrants = true) {
         if (!is_array($this->tableNames)) {
             $this->tableNames = array();
             self::$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_NUM);
@@ -107,9 +107,15 @@ class Database {
                 }
                 $this->tableNames[] = $table[0];
             }
-            //sort($this->table_names);
         }
-        return $this->tableNames;
+        $out = array();
+        $user = new User();
+        foreach ($this->tableNames as $tableName) {
+            if ($user->can(Grants::READ, $tableName) || !$checkGrants) {
+                $out[] = $tableName;
+            }
+        }
+        return $out;
     }
 
     /**
@@ -118,8 +124,8 @@ class Database {
      * @param string $name
      * @return Table|false The table, or false if it's not available.
      */
-    public function getTable($name) {
-        if (!in_array($name, $this->getTableNames())) {
+    public function getTable($name, $checkGrants = true) {
+        if (!in_array($name, $this->getTableNames($checkGrants))) {
             return false;
         }
         if (!isset($this->tables[$name])) {
@@ -154,7 +160,10 @@ class Database {
                 . " `id` INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `title` VARCHAR(100) NOT NULL UNIQUE"
                 . ");");
-        $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES (".User::ADMIN_GROUP_ID.",'Administrators'), (".User::ANON_GROUP_ID.",'Anonymous users');");;
+        $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES"
+                . " (" . User::ADMIN_GROUP_ID . ",'Administrators'),"
+                . " (" . User::PUBLIC_GROUP_ID . ",'General public');");
+        ;
         $this->query("CREATE TABLE IF NOT EXISTS users ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `username` VARCHAR(100) NOT NULL UNIQUE,"
@@ -162,7 +171,9 @@ class Database {
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`) "
                 . ")");
-        $this->query("INSERT IGNORE INTO users (`id`,`username`,`group`) VALUES (1,'admin',1), (2,'anonymous',2);");
+        $this->query("INSERT IGNORE INTO users (`id`,`username`,`password`,`group`) VALUES"
+                . "(1,'admin','" . password_hash('admin', PASSWORD_BCRYPT) . "'," . User::ADMIN_GROUP_ID . "),"
+                . "(2,'anonymous','" . password_hash('anon', PASSWORD_BCRYPT) . "'," . User::PUBLIC_GROUP_ID . ");");
         $this->query("CREATE TABLE IF NOT EXISTS grants ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
@@ -170,6 +181,10 @@ class Database {
                 . " `grant` VARCHAR(50) NOT NULL,"
                 . " `table_name` VARCHAR(65) NULL "
                 . ")");
+        $this->query("INSERT IGNORE INTO `grants` (`group`, `grant`, `table_name`) VALUES"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::READ . "','grants'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::UPDATE . "','grants'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::CREATE . "','grants');");
         $this->query("CREATE TABLE IF NOT EXISTS `changesets` ("
                 . " `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                 . " `date_and_time` DATETIME NOT NULL,"

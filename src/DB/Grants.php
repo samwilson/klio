@@ -14,11 +14,7 @@ class Grants {
     const DELETE = 'delete';
     const IMPORT = 'import';
 
-    private $option_name;
-
     public function __construct() {
-        $this->option_name = TABULATE_SLUG . '_grants';
-        add_option($this->option_name, '', null, false);
     }
 
     public function get_capabilities() {

@@ -17,7 +17,7 @@
                 <h2><a href="{{baseurl}}">{{site_title}}</a></h2>
                 <ol>
                     {% for table in tables %}
-                    <li><a href="{{baseurl}}/table/{{table}}">{{table|titlecase}}</a></li>
+                    <li><a href="{{baseurl}}/table/{{table}}" title="{{table.get_comment()}}">{{table|titlecase}}</a></li>
                     {% endfor %}
                 </ol>
             </nav>
@@ -33,7 +33,7 @@
                         </li>
                         {% else %}
                         <li>
-                            <a href="#">{{user.getName()}}</a>
+                            <a href="{{baseurl}}/record/users/{{user.getId()}}">Logged in as <code>{{user.getUsername()}}</code></a>
                         </li>
                         <li>
                             <a href="{{baseurl}}/logout">Log out</a>
@@ -41,12 +41,14 @@
                         {% endif %}
                     </ul>
                 </nav>
-                <h1>
-                    {{title}}
+                <div class="title">
+                    <h1>
+                        {{title}}
+                    </h1>
                     {% if subtitle %}
-                        <span class="subtitle">{{subtitle}}</span>
+                        <p class="subtitle">{{subtitle}}</p>
                     {% endif %}
-                </h1>
+                </div>
 
                 {% if table %}
                 <nav class="tabs">

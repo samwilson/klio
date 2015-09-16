@@ -9,15 +9,15 @@ use App\DB\Database;
 class TableController extends Base {
 
     private function getTable($tableName) {
-        $db = $this->getDb();
+        $db = new Database();
         $table = $db->getTable($tableName);
         if (!$table) {
-            throw new \Exception("Table '$table' not found.");
+            throw new \Exception("Table '$tableName' not found.");
         }
         return $table;
     }
 
-    public function view(Request $request, Response $response, array $args) {
+    public function index(Request $request, Response $response, array $args) {
         $table = $this->getTable($args['table']);
 
         // Pagination.
@@ -49,6 +49,8 @@ class TableController extends Base {
         // Give it all to the template.
         $template = new \App\Template('table.twig');
         $template->title = $table->get_title();
+        $template->subtitle = $table->get_comment();
+        $template->active_tab = 'search';
         $template->controller = 'table';
         $template->table = $table;
         $template->tables = $table->get_database()->getTableNames();

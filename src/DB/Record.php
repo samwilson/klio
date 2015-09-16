@@ -55,6 +55,10 @@ class Record {
             $col = $this->get_col($name);
             if ($col->is_foreign_key() && !empty($this->data->$name)) {
                 $referencedTable = $col->get_referenced_table();
+                if (!$referencedTable) {
+                    // May not have read permissions on the referenced table.
+                    return $this->data->$name;
+                }
                 $fkRecord = $referencedTable->get_record($this->data->$name);
                 $fkTitleCol = $referencedTable->get_title_column();
                 $fkTitleColName = $fkTitleCol->get_name();

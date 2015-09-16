@@ -4,11 +4,16 @@
     <form action="" method="post">
         <p>
             <label>
-                Username: <input type="text" name="username" class="focus-me" required="required" />
+                Username: <input type="text" name="username" {% if not username %}class="focus-me"{% endif %} required="required" value="{{username}}" />
+                {% if ldap_suffix %}{{ldap_suffix}}{% endif %}
             </label>
+        </p>
+        <p>
             <label>
-                Password: <input type="password" name="password" required="required" />
+                Password: <input type="password" name="password" required="required" {% if username %}class="focus-me"{% endif %} />
             </label>
+        </p>
+        <p>
             <button>Log in</button>
         </p>
     </form>

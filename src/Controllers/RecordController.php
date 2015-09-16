@@ -15,17 +15,29 @@ class RecordController extends Base {
     private function get_template($table) {
         $template = new \App\Template('record/admin.twig');
         $template->table = $table;
-        $template->controller = 'record';
         return $template;
+    }
+
+    public function view(Request $request, Response $response, array $args) {
+        
+        return $response;
     }
 
     public function edit(Request $request, Response $response, array $args) {
         // Get database and table.
         $db = new Database();
         $table = $db->getTable($args['table']);
+        $template = $this->get_template($table);
+        if (!$table) {
+            $template->message(\App\Template::ERROR, "Table {$args['table']} not found.");
+            $response->setContent($template->render());
+            return $response;
+        }
 
         // Give it all to the template.
-        $template = $this->get_template($table);
+        $template->user = $this->user;
+        $template->active_tab = 'create';
+        $template->title = $table->get_title();
         $template->tables = $db->getTableNames();
         if (isset($args['ident'])) {
             $template->record = $table->get_record($args['ident']);

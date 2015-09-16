@@ -64,7 +64,7 @@
             <!-- Right side -->
             <div class="alignleft actions bulkactions">
                 Export to:
-                <a href="{{table.get_url('export', {})}}" class="button"  title="Export to Comma Separated Values format">
+                <a href="{{baseurl}}/table/{{table.get_name()}}.csv" class="button"  title="Export to Comma Separated Values format">
                     CSV
                 </a>
                 {% if table.get_columns('point') %}

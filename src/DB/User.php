@@ -6,28 +6,38 @@ class User {
 
     const ADMIN_GROUP_ID = 1;
     const ADMIN_USER_ID = 1;
-    const ANON_GROUP_ID = 2;
+    const PUBLIC_GROUP_ID = 2;
     const ANON_USER_ID = 2;
 
     private static $data;
+
+    /** @var string[] */
+    private static $grants;
 
     public function __construct() {
         if (isset(self::$data->id)) {
             return;
         }
+        $this->loadData();
+    }
+
+    private function loadData() {
         $db = new \App\DB\Database();
-        $userId = (isset($_SESSION['user_id'])) ? $_SESSION['user_id'] : self::ANON_GROUP_ID;
-        self::$data = $db->query('SELECT * FROM `users` WHERE `id`=?', [1 => $userId])->fetch();
+        $userId = (isset($_SESSION['user_id'])) ? $_SESSION['user_id'] : self::ANON_USER_ID;
+        self::$data = $db->query('SELECT `id`, `username`, `group` FROM `users` WHERE `id`=?', [1 => $userId])->fetch();
+        if (!self::$data) {
+            throw new \Exception("Unable to load user $userId");
+        }
     }
 
     public function login($username, $password) {
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
         $db = new Database();
 
         // Try to log in with local credentials.
-        $sql = "SELECT id, username FROM users WHERE username = ? AND password = ? LIMIT 1;";
-        self::$data = $db->query($sql, [1 => $username, 2 => $hashedPassword])->fetch();
-        if (self::$data) {
+        $sql = "SELECT id, username, password FROM users WHERE username = ? LIMIT 1;";
+        $userData = $db->query($sql, [1 => $username])->fetch();
+        if ($userData && password_verify($password, $userData->password)) {
+            self::$data = $userData;
             $_SESSION['user_id'] = self::$data->id;
             return true;
         }
@@ -56,28 +66,49 @@ class User {
         return false;
     }
 
+    public function logout() {
+        $_SESSION['user_id'] = self::ANON_USER_ID;
+        $this->loadData();
+    }
+
+    public function getId() {
+        return self::$data->id;
+    }
+
+    public function getUsername() {
+        return self::$data->username;
+    }
+
     public function isAnon() {
-        return $this->inGroup(self::ANON_GROUP_ID);
+        return self::$data->id == self::ANON_USER_ID;
     }
 
     public function inGroup($groupId) {
         $db = new Database();
-        $sql = 'SELECT 1 FROM users u JOIN groups g ON u.group=g.id WHERE u.id=?';
-        return $db->query($sql, [1 => self::$data->id])->fetchColumn();
+        $sql = 'SELECT 1 FROM users u JOIN groups g ON u.group=g.id WHERE u.id=? AND g.id=?';
+        return $db->query($sql, [1 => self::$data->id, 2 => $groupId])->fetchColumn();
     }
 
     public function isAdmin() {
         return self::$data->id == self::ADMIN_ID;
     }
 
-    public function can($grant, $table) {
-        $db = new Database();
-        $sql = 'SELECT 1'
-                . ' FROM `grants`'
-                . '   JOIN `groups` ON `grants`.`group` = `groups`.`id`'
-                . '   JOIN `users` ON `groups`.id = `users`.`group`'
-                . ' WHERE `users`.`id` = :user_id AND `grants`.`grant` = :grant';
-        return $db->query($sql, ['user_id' => self::$data->id, 'grant' => $grant])->fetchColumn();
+    public function can($grant, $tableName) {
+        if (!is_array(self::$grants)) {
+            $db = new Database();
+            $sql = 'SELECT `grant`, `table_name`'
+                    . ' FROM `grants`'
+                    . '   JOIN `groups` ON `grants`.`group` = `groups`.`id`'
+                    . '   JOIN `users` ON `groups`.id = `users`.`group`'
+                    . ' WHERE `users`.`id` = :user_id';
+            $params = ['user_id' => self::$data->id];
+            self::$grants = [];
+            $grants = $db->query($sql, $params)->fetchAll();
+            foreach ($grants as $g) {
+                self::$grants[$g->table_name][$g->grant] = true;
+            }
+        }
+        return isset(self::$grants[$tableName][$grant]);
     }
 
 }
