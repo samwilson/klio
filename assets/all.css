@@ -29,6 +29,11 @@ nav.user a { padding:0 }
 div.content { background-color:white; float:left; width:84% }
 div.page { padding:1em 0.4em }
 
+/** Login form **/
+#login-form p { margin:0.4em 0 }
+#login-form label { display:inline-block; width:10em }
+#login-form p.submit { margin-left:15em }
+
 /** Alerts. */
 .alerts .alert { border:1px solid #ccc; margin:0.3em 0; padding:0.35em }
 .alerts .alert-success { border-color:green; color:green }
@@ -60,3 +65,12 @@ td { border:1px solid #dadcdd; vertical-align:top }
 footer { clear:both; text-align:right; font-size:smaller; background-color:#efefef; border-top:1px solid #bbb; margin-left:15%; padding:0.3em }
 .queries { text-align:left; margin:0; padding:0 }
 
+/** Grants. TODO: move to modules/grants/assets directory. */
+#grants-form label.checkbox { white-space:nowrap; display:inline-block; width:45%; border-bottom:1px solid white }
+#grants-form label.checkbox:hover { background-color:#9acfea }
+#grants-form label.checkbox.checked { color:green; border-bottom-color:#060 }
+#grants-form tr.select-all td,
+#grants-form td.select-all { border:1px solid #e1e1e1; background-color:#efffef; font-style:italic }
+#grants-form tr.select-all td { border-width:0 0 1px 0 }
+#grants-form td.select-all { border-width:0 1px }
+#grants-form tr.select-all td.label { border-width:0 0 0 1px; vertical-align:middle; text-align:center; font-size:larger }

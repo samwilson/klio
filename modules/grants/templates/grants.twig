@@ -1,11 +1,9 @@
 {% extends "base.twig" %}
 {% block content %}
 
-    <h2>Grants</h2>
-
     <p>Here you can grant access to the database to members of any Groups.</p>
 
-    <form action="{{form_action}}" method="post" class="tabulate-grants">
+    <form action="{{form_action}}" method="post" id="grants-form">
         <table>
             <thead>
                 <tr>
@@ -48,7 +46,7 @@
                 {% endfor %}
             <tbody>
         </table>
-        <p><input type="submit" name="save" value="Save" /></p>
+        <p><button>Save</button></p>
     </form>
 
 {% endblock %}

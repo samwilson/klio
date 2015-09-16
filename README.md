@@ -7,12 +7,14 @@ Just a thing.
 
 Module classes are in the same namspace as core classes.
 
+Modules can not define routes.
+
 ### Controllers
 
 For a URL of the form `/table/{table}/{action}` the first of the following will be used:
 - `App\Controllers\Tables\{Table}Controller::{action}`
 - `App\Controllers\Tables\{Table}Controller::index`
-- `App\Controllers\TableController::{action}}`
+- `App\Controllers\TableController::{action}`
 - `App\Controllers\TableController::index`
 
 ### Templates

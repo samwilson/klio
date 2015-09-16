@@ -54,11 +54,11 @@ class User {
             $adldap = new \Adldap\Adldap($adldapConfig);
             $loggedIn = $adldap->authenticate($username, $password, true);
             if ($loggedIn) {
-                $sql = 'INSERT IGNORE INTO `users` (`username`, `group`) VALUES(:username, :group);';
-                $db->query($sql, ['username' => $username, 'group' => self::ANON_GROUP_ID]);
+                $sql1 = 'INSERT IGNORE INTO `users` (`username`, `group`) VALUES(:username, :group);';
+                $db->query($sql1, ['username' => $username, 'group' => self::PUBLIC_GROUP_ID]);
                 // Re-fetch data.
-                $sql = "SELECT id, username FROM users WHERE username = :username LIMIT 1;";
-                self::$data = $db->query($sql, ['username' => $username])->fetch();
+                $sql2 = "SELECT id, username FROM users WHERE username = :username LIMIT 1;";
+                self::$data = $db->query($sql2, ['username' => $username])->fetch();
                 $_SESSION['user_id'] = self::$data->id;
                 return true;
             }
@@ -90,7 +90,7 @@ class User {
     }
 
     public function isAdmin() {
-        return self::$data->id == self::ADMIN_ID;
+        return $this->inGroup(self::ADMIN_GROUP_ID);
     }
 
     public function can($grant, $tableName) {

@@ -1,19 +1,17 @@
 {%extends "base.twig"%}
 
 {% block content %}
-    <form action="" method="post">
+    <form action="{{baseurl}}/login" method="post" id="login-form">
         <p>
-            <label>
-                Username: <input type="text" name="username" {% if not username %}class="focus-me"{% endif %} required="required" value="{{username}}" />
-                {% if ldap_suffix %}{{ldap_suffix}}{% endif %}
-            </label>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" {% if not username %}class="focus-me"{% endif %} required="required" value="{{username}}" />
+            {% if ldap_suffix %}<span class="ldap-suffix">{{ldap_suffix}}</span>{% endif %}
         </p>
         <p>
-            <label>
-                Password: <input type="password" name="password" required="required" {% if username %}class="focus-me"{% endif %} />
-            </label>
+            <label for="password">Password:</label>
+            <input type="password" name="password" required="required" {% if username %}class="focus-me"{% endif %} />
         </p>
-        <p>
+        <p class="submit">
             <button>Log in</button>
         </p>
     </form>
