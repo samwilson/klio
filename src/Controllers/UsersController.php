@@ -46,4 +46,25 @@ class UsersController extends Base {
         return RedirectResponse::create(\App\App::url('/login'));
     }
 
+    public function reset(Request $request, Response $response, array $args) {
+        $template = new \App\Template('reset.twig');
+        if (\App\App::env('ADLDAP_ENABLED')) {
+            $template->message('info', "Passwords managed in LDAP. Sorry, you can't change your password here.");
+        }
+        $template->title = 'Password reset';
+        $template->user = $this->user;
+        $response->setContent($template->render());
+        return $response;
+    }
+
+    public function resetPost(Request $request, Response $response, array $args) {
+        $username = $request->get('username');
+        if (!$username) {
+            return RedirectResponse::create(\App\App::url('/reset'));
+        }
+        $template = new \App\Template('reset.twig');
+        $response->setContent($template->render());
+        return $response;
+    }
+
 }

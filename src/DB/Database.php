@@ -168,6 +168,7 @@ class Database {
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `username` VARCHAR(100) NOT NULL UNIQUE,"
                 . " `password` VARCHAR(255) NOT NULL,"
+                . " `email` VARCHAR(255) NULL DEFAULT NULL,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`) "
                 . ")");

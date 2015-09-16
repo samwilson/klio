@@ -1,0 +1,13 @@
+{%extends "base.twig"%}
+
+{% block content %}
+    <form action="{{baseurl}}/reset" method="post" id="reset-form">
+        <p>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" class="focus-me" required="required" />
+        </p>
+        <p class="submit">
+            <button>Reset</button>
+        </p>
+    </form>
+{% endblock %}

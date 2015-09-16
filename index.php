@@ -18,18 +18,16 @@ $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASS']);
  * Routes.
  */
 $router = new League\Route\RouteCollection;
-//$router->setStrategy(new App\RoutingStrategy());
-//$router->addRoute('GET', '/{controller}/{action}', function(Request $request, Response $response) {
-//    $controller = new 
-//});
+
+$router->addRoute('GET', '/', 'App\Controllers\HomeController::index');
 //$router->addRoute('GET', '/{file:[^/]*}.{ext:(?:css|js)}', 'App\Controllers\AssetsController::asset');
 $router->addRoute('GET', '/install', 'App\Controllers\InstallController::install');
 $router->addRoute('POST', '/install', 'App\Controllers\InstallController::run');
-$router->addRoute('GET', '/', 'App\Controllers\HomeController::index');
-
 $router->addRoute('GET', '/login', 'App\Controllers\UsersController::login');
 $router->addRoute('POST', '/login', 'App\Controllers\UsersController::loginPost');
 $router->addRoute('GET', '/logout', 'App\Controllers\UsersController::logout');
+$router->addRoute('GET', '/reset', 'App\Controllers\UsersController::reset');
+$router->addRoute('POST', '/reset', 'App\Controllers\UsersController::resetPost');
 
 /**
  * Tables.
