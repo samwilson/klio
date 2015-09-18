@@ -62,9 +62,14 @@ class UsersController extends Base {
         if (!$username) {
             return RedirectResponse::create(\App\App::url('/reset'));
         }
+        $db = new \App\DB\Database();
+        $sql = "SELECT `email` FROM `users` WHERE `username` = ?";
+        $user = $db->query($sql, [1=>$username])->fetch();
+        if ($user) {
+        }
         $template = new \App\Template('reset.twig');
-        $response->setContent($template->render());
-        return $response;
+        $template->message('info', 'Please check your email.');
+        return RedirectResponse::create(\App\App::url('/login'));
     }
 
 }
