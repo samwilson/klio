@@ -39,6 +39,14 @@ class Template {
         $this->data[$name] = $value;
     }
 
+    public function __isset($name) {
+        return isset($this->data[$name]);
+    }
+
+    public function __get($name) {
+        return isset($this->data[$name]) ? $this->data[$name] : null;
+    }
+
     function getPaths() {
         return $this->paths;
     }

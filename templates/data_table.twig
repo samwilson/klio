@@ -1,54 +1,55 @@
 {% if not records %}
-<p>No records found.</p>
+    <p>No records found.</p>
 
 {% else %}
-<table class='wp-list-table widefat table tabulate'>
-	<thead>
-		<tr>
-			<th></th>
-			{% for column in table.get_columns %}
-			<th>
-				{{column.get_title}}
+    <table class='wp-list-table widefat table tabulate'>
+        <thead>
+            <tr>
+                <th></th>
+                    {% for column in table.get_columns %}
+                    <th>
+                        {{column.get_title}}
 
-				{% if sortable %}
-				<span class="no-break sort-icons">
+                        {% if sortable %}
+                            <span class="no-break sort-icons">
 
-					{% if table.get_order_by == column.get_name and table.get_order_dir == 'asc' %}
-					<span class="dashicons dashicons-arrow-up" title="Sorted ascending"></span>
-					{% else %}
-					<a href="{{table.get_url('index', {order_by:column.get_name, order_dir:'asc'})}}"
-					   class="dashicons dashicons-arrow-up" title="Sort ascending"></a>
-					{% endif %}
+                                {% if table.get_order_by == column.get_name and table.get_order_dir == 'asc' %}
+                                    <span class="dashicons dashicons-arrow-up" title="Sorted ascending"></span>
+                                {% else %}
+                                    <a href="{{table.get_url('index', {order_by:column.get_name, order_dir:'asc'})}}"
+                                       class="dashicons dashicons-arrow-up" title="Sort ascending"></a>
+                                {% endif %}
 
-					{% if table.get_order_by == column.get_name and table.get_order_dir == 'desc'%}
-					<span class="dashicons dashicons-arrow-down" title="Sorted descending"></span>
-					{% else %}
-					<a href="{{table.get_url('index', {order_by:column.get_name, order_dir:'desc'})}}"
-					   class="dashicons dashicons-arrow-down" title="Sort descending"></a>
-					{% endif %}
+                                {% if table.get_order_by == column.get_name and table.get_order_dir == 'desc'%}
+                                    <span class="dashicons dashicons-arrow-down" title="Sorted descending"></span>
+                                {% else %}
+                                    <a href="{{table.get_url('index', {order_by:column.get_name, order_dir:'desc'})}}"
+                                       class="dashicons dashicons-arrow-down" title="Sort descending"></a>
+                                {% endif %}
 
-				</span>
-				{% endif %}
+                            </span>
+                        {% endif %}
 
-			</th>
-			{% endfor %}
-		</tr>
-	</thead>
-	<tbody>
-		{% for record in records %}
-		<tr>
-			<td>
-				{% if links and table.is_updatable %}
-				<a href="{{ record.get_url() }}" class="">Edit</a>
-				{% endif %}
-			</td>
-			{% for column in table.get_columns %}
-			<td class="type-{{column.get_type()}} {% if column.is_foreign_key %}is-foreign-key{% endif %}">
-				{% include 'field/view.twig' %}
-			</td>
-			{% endfor %}
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td>
+                        {% if links and table.is_updatable %}
+                            <a href="{{baseurl}}/record/{{table.get_name}}/{{record.get_primary_key}}">View</a>
+                            <a href="{{baseurl}}/record/{{table.get_name}}/{{record.get_primary_key}}/edit">Edit</a>
+                        {% endif %}
+                    </td>
+                    {% for column in table.get_columns %}
+                        <td class="type-{{column.get_type()}} {% if column.is_foreign_key %}is-foreign-key{% endif %}">
+                            {% include 'field/view.twig' %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endif %}

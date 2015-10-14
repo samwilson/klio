@@ -14,7 +14,7 @@ class MapController extends ControllerBase {
 
 	protected function set_up( $args ) {
 		$db = new Database( $this->wpdb );
-		$this->table = $db->get_table( $args['table'] );
+		$this->table = $db->getTable( $args['table'] );
 
 		// Check that a point column exists.
 		$points = $this->table->get_columns( 'point' );

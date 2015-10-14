@@ -24,7 +24,7 @@ class App {
      * @return string
      */
     public static function baseurl() {
-        $baseurl = self::env('BASEURL', '/swidau');
+        $baseurl = self::env('BASEURL', '/klio');
         return rtrim($baseurl, '/');
     }
 
@@ -39,6 +39,18 @@ class App {
     public static function env($name, $default = null) {
         $env = getenv($name);
         return ($env) ? $env : $default;
+    }
+
+    /**
+     * Dump a variable with the Symfony VarDumper (only if in development mode).
+     * @param mixed $var
+     */
+    public static function dump() {
+        if (self::mode()!== 'production') {
+            foreach (func_get_args() as $var) {
+                \Symfony\Component\VarDumper\VarDumper::dump($var);
+            }
+        }
     }
 
     /**

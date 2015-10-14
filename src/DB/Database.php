@@ -2,6 +2,8 @@
 
 namespace App\DB;
 
+use App\DB\Tables\Permissions;
+
 class Database {
 
     /** @var \PDO */
@@ -72,13 +74,15 @@ class Database {
             } else {
                 $stmt->setFetchMode(\PDO::FETCH_OBJ);
             }
-            $result = $stmt->execute();
-            if (!$result) {
-                throw new \PDOException('Unable to execute parameterised SQL: <code>' . $sql . '</code>');
-            } else {
-                //echo '<p>Executed: '.$sql.'<br />with '.  print_r($params, true).'</p>';
+            $errorMessage = 'Unable to execute parameterised SQL: <code>' . $sql . '</code> data was: '.  print_r($params, true);
+            try {
+                $result = $stmt->execute();
+            } catch (\PDOException $e) {
+                throw new \PDOException($e->getMessage()." -- $errorMessage");
             }
-            //exit();
+            if (!$result) {
+                throw new \PDOException($errorMessage);
+            }
         } else {
             try {
                 if ($class) {
@@ -95,8 +99,8 @@ class Database {
         return $stmt;
     }
 
-    public function getTableNames($checkGrants = true) {
-        if (!is_array($this->tableNames)) {
+    public function getTableNames($checkGrants = true, $reload = false) {
+        if (!is_array($this->tableNames) || $reload) {
             $this->tableNames = array();
             self::$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_NUM);
             $tables = $this->query('SHOW FULL TABLES');
@@ -111,7 +115,7 @@ class Database {
         $out = array();
         $user = new User();
         foreach ($this->tableNames as $tableName) {
-            if ($user->can(Grants::READ, $tableName) || !$checkGrants) {
+            if ($user->can(Tables\Permissions::READ, $tableName, $reload) || !$checkGrants) {
                 $out[] = $tableName;
             }
         }
@@ -141,8 +145,8 @@ class Database {
      */
     public function get_tables($exclude_views = true) {
         $out = array();
-        foreach ($this->get_table_names() as $name) {
-            $table = $this->get_table($name);
+        foreach ($this->getTableNames() as $name) {
+            $table = $this->getTable($name);
             // If this table is not available, skip it.
             if (!$table) {
                 continue;
@@ -161,9 +165,8 @@ class Database {
                 . " `title` VARCHAR(100) NOT NULL UNIQUE"
                 . ");");
         $this->query("INSERT IGNORE INTO `groups` (`id`,`title`) VALUES"
-                . " (" . User::ADMIN_GROUP_ID . ",'Administrators'),"
-                . " (" . User::PUBLIC_GROUP_ID . ",'General public');");
-        ;
+                . " (" . User::ADMIN_GROUP_ID . ", 'Administrators'),"
+                . " (" . User::PUBLIC_GROUP_ID . ", 'General public');");
         $this->query("CREATE TABLE IF NOT EXISTS users ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `username` VARCHAR(100) NOT NULL UNIQUE,"
@@ -175,17 +178,31 @@ class Database {
         $this->query("INSERT IGNORE INTO users (`id`,`username`,`password`,`group`) VALUES"
                 . "(1,'admin','" . password_hash('admin', PASSWORD_BCRYPT) . "'," . User::ADMIN_GROUP_ID . "),"
                 . "(2,'anonymous','" . password_hash('anon', PASSWORD_BCRYPT) . "'," . User::PUBLIC_GROUP_ID . ");");
+        $this->query("CREATE TABLE IF NOT EXISTS `permissions` ("
+                . " `id` INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
+                . " `title` VARCHAR(100) NOT NULL UNIQUE"
+                . ");");
+        $this->query("INSERT IGNORE INTO `permissions` (`id`,`title`) VALUES"
+                . " (" . Permissions::CREATE . ", 'Create'),"
+                . " (" . Permissions::READ . ", 'Read'),"
+                . " (" . Permissions::UPDATE . ", 'Update'),"
+                . " (" . Permissions::DELETE . ", 'Delete'),"
+                . " (" . Permissions::IMPORT . ", 'Import');");
         $this->query("CREATE TABLE IF NOT EXISTS grants ("
                 . " `id` INT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
                 . " `group` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
                 . "         FOREIGN KEY (`group`) REFERENCES `groups` (`id`),"
-                . " `grant` VARCHAR(50) NOT NULL,"
-                . " `table_name` VARCHAR(65) NULL "
+                . " `permission` INT(2) UNSIGNED NOT NULL DEFAULT 0,"
+                . "         FOREIGN KEY (`permission`) REFERENCES `permissions` (`id`),"
+                . " `table_name` VARCHAR(65) NULL,"
+                . " UNIQUE KEY (`group`,`permission`,`table_name`) "
                 . ")");
-        $this->query("INSERT IGNORE INTO `grants` (`group`, `grant`, `table_name`) VALUES"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::READ . "','grants'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::UPDATE . "','grants'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Grants::CREATE . "','grants');");
+        $this->query("INSERT IGNORE INTO `grants` (`group`, `permission`, `table_name`) VALUES"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','grants'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::UPDATE . "','grants'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::CREATE . "','grants'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','permissions'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','groups')");
         $this->query("CREATE TABLE IF NOT EXISTS `changesets` ("
                 . " `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                 . " `date_and_time` DATETIME NOT NULL,"

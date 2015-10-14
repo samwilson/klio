@@ -59,14 +59,14 @@
                         <li {% if active_tab=='create' %}class="active"{% endif %}>
                             <a href="{{baseurl}}/record/{{table.get_name()}}">Create</a>
                         </li>
+                        <li {% if active_tab=='view' %}class="active"{% endif %}>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}">View</a>
+                        </li>
                         <li {% if active_tab=='edit' %}class="active"{% endif %}>
-                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}">Edit</a>
+                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}/edit">Edit</a>
                         </li>
                         <li {% if active_tab=='import' %}class="active"{% endif %}>
-                            <a href="{{baseurl}}/record/{{table.get_name()}}/import">Import</a>
-                        </li>
-                        <li {% if active_tab=='calendar' %}class="active"{% endif %}>
-                            <a href="{{baseurl}}/record/{{table.get_name()}}/calendar">Calendar</a>
+                            <a href="{{baseurl}}/table/{{table.get_name()}}/import">Import</a>
                         </li>
                     </ul>
                 </nav>

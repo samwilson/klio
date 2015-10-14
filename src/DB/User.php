@@ -93,22 +93,23 @@ class User {
         return $this->inGroup(self::ADMIN_GROUP_ID);
     }
 
-    public function can($grant, $tableName) {
-        if (!is_array(self::$grants)) {
+    public function can($permission, $tableName, $reload = false) {
+        if (!is_array(self::$grants) || $reload) {
             $db = new Database();
-            $sql = 'SELECT `grant`, `table_name`'
+            $sql = 'SELECT `table_name`, `permissions`.`id` AS `permission`'
                     . ' FROM `grants`'
                     . '   JOIN `groups` ON `grants`.`group` = `groups`.`id`'
                     . '   JOIN `users` ON `groups`.id = `users`.`group`'
+                    . '   JOIN `permissions` ON `grants`.`permission` = `permissions`.`id`'
                     . ' WHERE `users`.`id` = :user_id';
             $params = ['user_id' => self::$data->id];
             self::$grants = [];
             $grants = $db->query($sql, $params)->fetchAll();
             foreach ($grants as $g) {
-                self::$grants[$g->table_name][$g->grant] = true;
+                self::$grants[$g->table_name][$g->permission] = true;
             }
         }
-        return isset(self::$grants[$tableName][$grant]);
+        return isset(self::$grants[$tableName][$permission]);
     }
 
 }

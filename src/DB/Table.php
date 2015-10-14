@@ -2,6 +2,8 @@
 
 namespace App\DB;
 
+use App\App;
+
 class Table {
 
     /** @static A base table. */
@@ -10,7 +12,7 @@ class Table {
     /** @static A database view, possibly of multiple base tables. */
     const TYPE_VIEW = 'view';
 
-    /** @var Database The database to which this table belongs. */
+    /** @var \App\DB\Database The database to which this table belongs. */
     protected $database;
 
     /** @var string The name of this table. */
@@ -720,7 +722,7 @@ class Table {
         if ($instantiate) {
             $this->referenced_tables = array();
             foreach ($this->referenced_table_names as $refCol => $ref_tab) {
-                $this->referenced_tables[$refCol] = $this->get_database()->get_table($ref_tab);
+                $this->referenced_tables[$refCol] = $this->get_database()->getTable($ref_tab);
             }
         }
 
@@ -869,7 +871,7 @@ class Table {
     public function save_record($data, $pk_value = null) {
         // Changeset only created here if not already in progress.
         $changeset_comment = isset($data['changeset_comment']) ? $data['changeset_comment'] : null;
-        $change_tracker = new ChangeTracker($this->get_database()->get_wpdb(), $changeset_comment);
+        $change_tracker = new ChangeTracker($this->get_database(), $changeset_comment);
 
         $columns = $this->get_columns();
 
@@ -913,7 +915,7 @@ class Table {
 
             // Nulls
             elseif (is_null($value) && $column->nullable()) {
-                $data[$field] = null;
+                unset($data[$field]);
                 $sql_values[$field] = 'NULL';
             }
 
@@ -923,23 +925,21 @@ class Table {
             }
 
             // Numeric values.
-            elseif ($column->is_numeric()) {
-                $sql_values[$field] = $value;
-            }
+//            elseif ($column->is_numeric()) {
+//                $sql_values[$field] = $value;
+//            }
 
             // Everything else.
             else {
-                $sql_values[$field] = "'" . esc_sql($value) . "'";
+                $data[$field] = $value;
+                $sql_values[$field] = ":$field";
             }
         }
 
-        // Find the PK, and hide errors (for now).
+        // Find the PK.
         $pk_name = $this->get_pk_column()->get_name();
-        $this->database->get_wpdb()->hide_errors();
 
         // Compile SQL for insert and update statements.
-        // This is a workaround for NULL support in $wpdb->update() and $wpdb->insert().
-        // Can probably be removed when https://core.trac.wordpress.org/ticket/15158 is resolved.
         $set_items = array();
         foreach ($sql_values as $field => $escd_datum) {
             $set_items[] = "`$field` = $escd_datum";
@@ -953,26 +953,29 @@ class Table {
 
         $change_tracker->before_save($this, $data, $pk_value);
 
+        $user = new User();
         if ($pk_value) { // Update?
             // Check permission.
-            if (!Grants::current_user_can(Grants::UPDATE, $this->get_name())) {
-                throw new \Exception('You do not have permission to update data in this table.');
+            if (!$user->can(Tables\Permissions::UPDATE, $this->get_name())) {
+                throw new \Exception('You do not have permission to update data in the "' . $this->get_name() . '" table.');
             }
-            $where_clause = $this->database->get_wpdb()->prepare("WHERE `$pk_name` = %s", $pk_value);
-            $this->database->get_wpdb()->query('UPDATE ' . $this->get_name() . " $set_clause $where_clause;");
+            //$where_clause = $this->database->prepare("WHERE `$pk_name` = :pk", $pk_value);
+            $sql = "UPDATE " . $this->get_name() . " $set_clause WHERE `$pk_name` = :$pk_name;";
+            $this->database->query($sql, $data);
             $new_pk_value = (isset($data[$pk_name]) ) ? $data[$pk_name] : $pk_value;
         } else { // Or insert?
             // Check permission.
-            if (!Grants::current_user_can(Grants::CREATE, $this->get_name())) {
-                throw new \Exception('You do not have permission to insert records into this table.');
+            if (!$user->can(Tables\Permissions::CREATE, $this->get_name())) {
+                throw new \Exception('You do not have permission to insert records into the "' . $this->get_name() . '" table.');
             }
             $sql = 'INSERT INTO ' . $this->get_name() . ' ' . $set_clause . ';';
-            $this->database->get_wpdb()->query($sql);
-            if (!empty($this->database->get_wpdb()->last_error)) {
-                Exception::wp_die('The record was not created.', 'Unable to create record', $this->database->get_wpdb()->last_error, $sql);
-            }
+            //App::dump($sql, $data);exit();
+            $this->database->query($sql, $data);
+//            if (!empty($this->database->->last_error)) {
+//                Exception::wp_die('The record was not created.', 'Unable to create record', $this->database->get_wpdb()->last_error, $sql);
+//            }
             if ($this->get_pk_column()->is_auto_increment()) {
-                $new_pk_value = $this->database->get_wpdb()->insert_id;
+                $new_pk_value = $this->database->lastInsertId();
             } elseif (isset($data[$pk_name])) {
                 $new_pk_value = $data[$pk_name];
             }
@@ -984,7 +987,6 @@ class Table {
 
         // Show errors again, reset the record count,
         // and return the new or updated record.
-        $this->database->get_wpdb()->show_errors();
         $this->record_count = false;
         return $new_record;
     }
@@ -999,7 +1001,7 @@ class Table {
         if ($extra_params !== false) {
             $params = array_merge($_GET, $params, $extra_params);
         }
-        return 'table/' . $this->get_name() . '/?' . http_build_query($params);
+        return 'table/' . $this->get_name() . '?' . http_build_query($params);
     }
 
 }

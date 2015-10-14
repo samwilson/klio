@@ -2,8 +2,8 @@
 {% block content %}
 
     <p>Here you can grant access to the database to members of any Groups.</p>
-
-    <form action="{{form_action}}" method="post" id="grants-form">
+{{dump(grants)}}
+    <form action="{{baseurl}}/table/grants/save" method="post" id="grants-form">
         <table>
             <thead>
                 <tr>
@@ -31,11 +31,11 @@
                                 <div data-role="{{group.id}}">
                                     {% for cap in capabilities %}
                                         <label class="checkbox">
-                                            <input type="checkbox" name="{{table}}[{{cap}}][{{role}}]"
-                                                   {% if role in attribute( attribute(grants, table), cap ) %}
+                                            <input type="checkbox" name="{{table}}[{{cap}}][{{group.id}}]" value="{{group.id}}"
+                                                   {% if group.id in attribute( attribute(grants, table), cap ) %}
                                                        checked
                                                    {% endif %}
-                                                   data-capability="{{cap}}" value="1" />
+                                                   data-capability="{{cap}}" />
                                             {{cap|titlecase}}
                                         </label>
                                     {% endfor %}

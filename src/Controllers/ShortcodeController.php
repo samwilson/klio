@@ -35,7 +35,7 @@ class ShortcodeController extends ControllerBase {
 		if ( ! isset( $attrs['table'] ) ) {
 			return $this->error( "The 'table' attribute must be set." );
 		}
-		$table = $this->db->get_table( $attrs['table'] );
+		$table = $this->db->getTable( $attrs['table'] );
 		if ( ! $table ) {
 			if ( ! is_user_logged_in() ) {
 				return $this->error( "You are not logged in. " . wp_loginout( get_the_permalink(), false ) );

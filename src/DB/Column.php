@@ -277,7 +277,7 @@ class Column {
 	 *
 	 * @return Table The table object.
 	 */
-	public function get_table() {
+	public function getTable() {
 		return $this->table;
 	}
 

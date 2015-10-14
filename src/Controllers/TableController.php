@@ -8,7 +8,7 @@ use App\DB\Database;
 
 class TableController extends Base {
 
-    private function getTable($tableName) {
+    protected function getTable($tableName) {
         $db = new Database();
         $table = $db->getTable($tableName);
         if (!$table) {

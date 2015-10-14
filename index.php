@@ -34,6 +34,7 @@ $router->addRoute('POST', '/reset', 'App\Controllers\UsersController::resetPost'
  */
 $router->addRoute('GET', '/table/{table}', 'tableDispatcher');
 $router->addRoute('GET', '/table/{table}/{action}', 'tableDispatcher');
+$router->addRoute('POST', '/table/{table}/{action}', 'tableDispatcher');
 
 function tableDispatcher(Request $request, Response $response, $args) {
     $controllerClassname = '\\App\\Controllers\\Tables\\' . \App\App::camelcase($args['table']) . 'Controller';
@@ -46,10 +47,14 @@ function tableDispatcher(Request $request, Response $response, $args) {
  * Records.
  */
 $router->addRoute('GET', '/record/{table}', 'App\Controllers\RecordController::edit');
+$router->addRoute('POST', '/record/{table}', 'App\Controllers\RecordController::save');
 $router->addRoute('GET', '/record/{table}/{id}', 'App\Controllers\RecordController::view');
 $router->addRoute('GET', '/record/{table}/{id}/edit', 'App\Controllers\RecordController::edit');
 $router->addRoute('GET', '/record/{table}/{id}/delete', 'App\Controllers\RecordController::delete');
 
+/**
+ * Dispatch the request.
+ */
 $dispatcher = $router->getDispatcher();
 $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
 try {

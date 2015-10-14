@@ -11,12 +11,8 @@ abstract class Base {
         $this->user = new \App\DB\User();
     }
 
-//    protected function getDb() {
-//        $db = new \App\DB\Database();
-//        if (!$db->getTable('users')) {
-//            throw new \Exception('users table not found');
-//        }
-//        return $db;
-//    }
+    protected function redirect($url) {
+        return new \Symfony\Component\HttpFoundation\RedirectResponse(\App\App::baseurl() . '/' . ltrim($url, '/'));
+    }
 
 }

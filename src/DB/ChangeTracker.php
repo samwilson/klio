@@ -2,120 +2,120 @@
 
 namespace App\DB;
 
-use WordPress\Tabulate\DB\Database;
-use WordPress\Tabulate\DB\Table;
-use WordPress\Tabulate\DB\Record;
+use App\DB\Database;
+use App\DB\Table;
+use App\DB\Record;
 
 class ChangeTracker {
 
-	/** @var \wpdb */
-	protected $wpdb;
+    /** @var \App\DB\Database */
+    protected $db;
+    private static $current_changeset_id = false;
+    private $current_changeset_comment = null;
 
-	private static $current_changeset_id = false;
+    /** @var \App\DB\Record|false */
+    private $old_record = false;
 
-	private $current_changeset_comment = null;
+    /** @var boolean Whether the changeset should be closed after the first after_save() call. */
+    private static $keep_changeset_open = false;
 
-	/** @var \WordPress\Tabulate\DB\Record|false */
-	private $old_record = false;
+    public function __construct(Database $db, $comment = null) {
+        $this->db = $db;
+        $this->current_changeset_comment = $comment;
+    }
 
-	/** @var boolean Whether the changeset should be closed after the first after_save() call. */
-	private static $keep_changeset_open = false;
+    /**
+     * Open a new changeset. If one is already open, this does nothing.
+     * @global \WP_User $current_user
+     * @param string $comment
+     * @param boolean $keep_open Whether the changeset should be kept open (and manually closed) after after_save() is called.
+     */
+    public function open_changeset($comment, $keep_open = null) {
+        if (!is_null($keep_open)) {
+            self::$keep_changeset_open = $keep_open;
+        }
+        if (!self::$current_changeset_id) {
+            $user = new User();
+            $data = array(
+                'user' => $user->getId(),
+                'comment' => $comment,
+            );
+            $sql = "INSERT INTO changesets SET date_and_time=NOW(), user=:user, comment=:comment;";
+            $this->db->query($sql, $data);
+            self::$current_changeset_id = $this->db->lastInsertId();
+        }
+    }
 
-	public function __construct( $wpdb, $comment = null ) {
-		$this->wpdb = $wpdb;
-		$this->current_changeset_comment = $comment;
-	}
+    /**
+     * Close the current changeset.
+     * @return void
+     */
+    public function close_changeset() {
+        self::$current_changeset_id = false;
+        $this->current_changeset_comment = null;
+    }
 
-	/**
-	 * Open a new changeset. If one is already open, this does nothing.
-	 * @global \WP_User $current_user
-	 * @param string $comment
-	 * @param boolean $keep_open Whether the changeset should be kept open (and manually closed) after after_save() is called.
-	 */
-	public function open_changeset( $comment, $keep_open = null ) {
-		global $current_user;
-		if ( ! is_null( $keep_open ) ) {
-			self::$keep_changeset_open = $keep_open;
-		}
-		if ( ! self::$current_changeset_id ) {
-			$data = array(
-				'date_and_time' => date( 'Y-m-d H:i:s' ),
-				'user_id' => $current_user->ID,
-				'comment' => $comment,
-			);
-			$this->wpdb->insert( $this->changesets_name(), $data );
-			self::$current_changeset_id = $this->wpdb->insert_id;
-		}
-	}
+    public function before_save(Table $table, $data, $pk_value) {
+        // Don't save changes to the changes tables.
+        if (in_array($table->get_name(), $this->table_names())) {
+            return false;
+        }
 
-	/**
-	 * Close the current changeset.
-	 * @return void
-	 */
-	public function close_changeset() {
-		self::$current_changeset_id = false;
-		$this->current_changeset_comment = null;
-	}
+        // Open a changeset if required.
+        $this->open_changeset($this->current_changeset_comment);
 
-	public function before_save( Table $table, $data, $pk_value ) {
-		// Don't save changes to the changes tables.
-		if ( in_array( $table->get_name(), $this->table_names() ) ) {
-			return false;
-		}
+        // Get the current (i.e. soon-to-be-old) data for later use.
+        $this->old_record = $table->get_record($pk_value);
+    }
 
-		// Open a changeset if required.
-		$this->open_changeset( $this->current_changeset_comment );
+    public function after_save(Table $table, Record $new_record) {
+        // Don't save changes to the changes tables.
+        if (in_array($table->get_name(), self::table_names())) {
+            return false;
+        }
 
-		// Get the current (i.e. soon-to-be-old) data for later use.
-		$this->old_record = $table->get_record( $pk_value );
-	}
+        // Save a change for each changed column.
+        foreach ($table->get_columns() as $column) {
+            $col_name = ( $column->is_foreign_key() ) ? $column->get_name() . Record::FKTITLE : $column->get_name();
+            $old_val = ( is_callable(array($this->old_record, $col_name)) ) ? $this->old_record->$col_name() : null;
+            $new_val = $new_record->$col_name();
+            if ($new_val == $old_val) {
+                // Ignore unchanged columns.
+                continue;
+            }
+            $data = array(
+                'changeset' => self::$current_changeset_id,
+                'table_name' => $table->get_name(),
+                'column_name' => $column->get_name(),
+                'record_ident' => $new_record->get_primary_key(),
+                'old_value' => $old_val,
+                'new_value' => $new_val,
+            );
+            $sql = "INSERT INTO changes SET"
+                    . " changeset = :changeset,"
+                    . " change_type = 'field',"
+                    . " table_name = :table_name,"
+                    . " column_name = :column_name,"
+                    . " record_ident = :record_ident,"
+                    . " old_value = :old_value,"
+                    . " new_value = :new_value"
+                    . ";";
+            $this->db->query($sql, $data);
+        }
 
-	public function after_save( Table $table, Record $new_record ) {
-		// Don't save changes to the changes tables.
-		if ( in_array( $table->get_name(), self::table_names() ) ) {
-			return false;
-		}
+        // Close the changeset if required.
+        if (!self::$keep_changeset_open) {
+            $this->close_changeset();
+        }
+    }
 
-		// Save a change for each changed column.
-		foreach ( $table->get_columns() as $column ) {
-			$col_name = ( $column->is_foreign_key() ) ? $column->get_name().Record::FKTITLE : $column->get_name();
-			$old_val = ( is_callable( array( $this->old_record, $col_name ) ) ) ? $this->old_record->$col_name() : null;
-			$new_val = $new_record->$col_name();
-			if ($new_val == $old_val ) {
-				// Ignore unchanged columns.
-				continue;
-			}
-			$data = array(
-				'changeset_id' => self::$current_changeset_id,
-				'change_type' => 'field',
-				'table_name' => $table->get_name(),
-				'column_name' => $column->get_name(),
-				'record_ident' => $new_record->get_primary_key(),
-			);
-			// Daft workaround for https://core.trac.wordpress.org/ticket/15158
-			if ( ! is_null( $old_val ) ) {
-				$data[ 'old_value' ] = $old_val;
-			}
-			if ( ! is_null( $new_val ) ) {
-				$data[ 'new_value' ] = $new_val;
-			}
-			// Save the change record.
-			$this->wpdb->insert( $this->changes_name(), $data );
-		}
-
-		// Close the changeset if required.
-		if ( ! self::$keep_changeset_open ) {
-			$this->close_changeset();
-		}
-	}
-
-	/**
-	 * Get a list of the names used by the change-tracking subsystem.
-	 * @global wpdb $wpdb
-	 * @return array|string
-	 */
-	public static function table_names() {
-		return array( self::changesets_name(), self::changes_name() );
-	}
+    /**
+     * Get a list of the names used by the change-tracking subsystem.
+     * @global wpdb $wpdb
+     * @return array|string
+     */
+    public static function table_names() {
+        return array('changesets', 'changes');
+    }
 
 }

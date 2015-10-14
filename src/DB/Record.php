@@ -173,37 +173,43 @@ class Record {
         return $foreign_table->get_records($with_pagination);
     }
 
-    public function get_url($action = 'index', $include_ident = true) {
-        return 'record/' . $this->table->get_name() . '/' . $this->get_primary_key();
-        $params = array(
-            'page' => 'tabulate',
-            'controller' => 'record',
-            'action' => $action,
-            'table' => $this->table->get_name(),
-        );
-        if ($include_ident && $this->get_primary_key() !== false) {
-            $params['ident'] = $this->get_primary_key();
+    /**
+     * Get the URL (or part thereof) for this Record.
+     * @param boolean $full Whether to include the Base URL or not. Defaults to not.
+     * @return string
+     */
+    public function get_url($full = false) {
+        $url = '/record/' . $this->table->get_name();
+        if ($this->get_primary_key()) {
+            $url .= '/' . $this->get_primary_key();
         }
-        return admin_url('admin.php?' . http_build_query($params));
+        if ($full) {
+            $url = \App\App::baseurl() . $url;
+        }
+        return $url;
     }
 
     /**
      * Get most recent changes.
-     * @return array|string
+     * @return string[]
      */
     public function get_changes() {
-        $wpdb = $this->table->get_database()->get_wpdb();
-        $sql = "SELECT cs.id AS changeset_id, c.id AS change_id, date_and_time, "
-                . "user_nicename, table_name, record_ident, column_name, old_value, "
-                . "new_value, comment "
-                . "FROM " . ChangeTracker::changes_name() . " c "
-                . "  JOIN " . ChangeTracker::changesets_name() . " cs ON (c.changeset_id=cs.id) "
-                . "  JOIN {$wpdb->prefix}users u ON (u.ID=cs.user_id) "
-                . "WHERE table_name = %s AND record_ident = %s"
-                . "ORDER BY date_and_time DESC, cs.id DESC "
-                . "LIMIT 15 ";
-        $params = array($this->table->get_name(), $this->get_primary_key());
-        return $wpdb->get_results($wpdb->prepare($sql, $params));
+        $sql = "SELECT "
+                . "   cs.id AS changeset_id, c.id AS change_id, date_and_time, "
+                . "   username, table_name, record_ident, column_name, "
+                . "   old_value, new_value, comment "
+                . " FROM `changes` c "
+                . "   JOIN `changesets` cs ON (c.changeset = cs.id) "
+                . "   JOIN `users` u ON (u.ID = cs.user) "
+                . " WHERE `table_name` = :table AND record_ident = :id "
+                . " ORDER BY `date_and_time` DESC, cs.id DESC "
+                . " LIMIT 15 ";
+        $params = array(
+            'table' => $this->table->get_name(),
+            'id' => $this->get_primary_key(),
+        );
+        $db = $this->table->get_database();
+        return $db->query($sql, $params);
     }
 
 }

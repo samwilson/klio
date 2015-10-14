@@ -2,18 +2,19 @@
 
 {% block content %}
 
-<form method="post" action="{{record.get_url('save')}}" class="tabulate-record">
+<form method="post" action="{{baseurl}}/record/{{table.get_name()}}">
     <table>
 
         {% for column in table.get_columns %}
         <tr>
             <th class="column-title">
-                <label for="{{column.get_name}}" class="right inline">{{column.get_title}}
+                <label for="{{column.get_name}}" class="right inline">
+                    {{column.get_title}}
                     {% if column.is_required and not column.is_auto_increment %}*{% endif %}
                 </label>
             </th>
 
-            <td class='form-field form-required'><!-- Data entry cell -->
+            <td class='form-field'><!-- Data entry cell -->
                 {% include 'field/edit.twig' %}
             </td><!-- End data entry cell -->
 
@@ -135,7 +136,7 @@
                             <td class="value">{{change.old_value}}</td>
                             <td>&rArr;</td>
                             <td class="value">{{change.new_value}}</td>
-                            <td>{{change.user_nicename}}</td>
+                            <td>{{change.username}}</td>
                             <td><em>{{change.comment}}</em></td>
                         </tr>
                         {% endfor %}

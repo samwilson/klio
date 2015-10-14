@@ -83,7 +83,7 @@ class ApiController extends ControllerBase {
 			return array();
 		}
 		$db = new Database( $this->wpdb );
-		$table = $db->get_table( $table_name );
+		$table = $db->getTable( $table_name );
 		if ( ! $table instanceof \WordPress\Tabulate\DB\Table ) {
 			return array();
 		}

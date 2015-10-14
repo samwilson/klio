@@ -8,6 +8,6 @@
         <env name="MODE" value="testing" />
         <env name="DB_NAME" value="klio_test" />
         <env name="DB_USER" value="root" />
-        <env name="DB_PASS" value="dev123dev" />
+        <env name="DB_PASS" value="Pa55w0rD" />
     </php>
 </phpunit>
