@@ -60,10 +60,24 @@
                             <a href="{{baseurl}}/record/{{table.get_name()}}">Create</a>
                         </li>
                         <li {% if active_tab=='view' %}class="active"{% endif %}>
-                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}">View</a>
+                            <a {% if record.get_primary_key %}
+                               href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}"
+                               {% else %}
+                               class="inactive"
+                               {% endif %}
+                               >
+                                View
+                            </a>
                         </li>
                         <li {% if active_tab=='edit' %}class="active"{% endif %}>
-                            <a href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}/edit">Edit</a>
+                            <a {% if record.get_primary_key %}
+                               href="{{baseurl}}/record/{{table.get_name()}}/{{record.get_primary_key()}}/edit"
+                               {% else %}
+                               class="inactive"
+                               {% endif %}
+                               >
+                                Edit
+                            </a>
                         </li>
                         <li {% if active_tab=='import' %}class="active"{% endif %}>
                             <a href="{{baseurl}}/table/{{table.get_name()}}/import">Import</a>

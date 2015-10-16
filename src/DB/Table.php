@@ -124,6 +124,8 @@ class Table {
                 'value' => $value,
                 'force' => $force,
             );
+            // Reset the record count.
+            $this->record_count = false;
         }
     }
 
@@ -182,7 +184,7 @@ class Table {
                 $params[$param_name] = '%' . trim($filter['value']) . '%';
             } // Equals or does-not-equal
             elseif ($filter['operator'] == '=' || $filter['operator'] == '!=') {
-                $where_clause .= " AND $f_column " . strtoupper($filter['operator']) . " %s ";
+                $where_clause .= " AND $f_column " . strtoupper($filter['operator']) . " :$param_name ";
                 $params[$param_name] = trim($filter['value']);
             } // IS EMPTY
             elseif ($filter['operator'] == 'empty') {
@@ -195,14 +197,15 @@ class Table {
                 $values = explode("\n", $filter['value']);
                 $placeholders = array();
                 foreach ($values as $vid => $val) {
-                    $placeholders[] = "%s";
-                    $params[$param_name . '_' . $vid] = trim($val);
+                    $paramPartName = $param_name . '_' . $vid;
+                    $placeholders[] = ":$paramPartName";
+                    $params[$paramPartName] = trim($val);
                 }
                 $negate = ( $filter['operator'] == 'not in' ) ? 'NOT' : '';
                 $where_clause .= " AND ($f_column $negate IN (" . join(", ", $placeholders) . "))";
             } // Other operators. They're already validated in $this->addFilter()
             else {
-                $where_clause .= " AND ($f_column " . $filter['operator'] . " %s)";
+                $where_clause .= " AND ($f_column " . $filter['operator'] . " :$param_name)";
                 $params[$param_name] = trim($filter['value']);
             }
 
@@ -549,7 +552,7 @@ class Table {
 
         $params = $this->apply_filters($sql);
 
-        $filename = get_temp_dir() . uniqid('tabulate_') . '.csv';
+        $filename = sys_get_temp_dir() . '/' . uniqid(App::snakeCase(App::name()).'_') . '.csv';
         if (DIRECTORY_SEPARATOR == '\\') {
             // Clean Windows slashes, for MySQL's benefit.
             $filename = str_replace('\\', '/', $filename);
@@ -566,19 +569,13 @@ class Table {
                 . ' ENCLOSED BY \'"\''
                 . ' ESCAPED BY \'"\''
                 . ' LINES TERMINATED BY "\r\n"';
-        // Execute the SQL (hiding errors for now).
-        $wpdb = $this->database->get_wpdb();
-        if ($params) {
-            $sql = $wpdb->prepare($sql, $params);
-        }
-        $wpdb->hide_errors();
-        $wpdb->query($sql);
+        // Execute the SQL.
+        $this->database->query($sql, $params);
         // Make sure it exported.
         if (!file_exists($filename)) {
-            $msg = "Unable to create temporary export file:<br /><code>$filename</code>";
-            Exception::wp_die($msg, "Export failed", $wpdb->last_error, $sql);
+            $msg = "Unable to create temporary export file:<br /><code>$filename</code><br />SQL was: <pre>$sql</pre>";
+            throw new Exception($msg);
         }
-        $wpdb->show_errors();
         // Give the filename back to the controller, to send to the client.
         return $filename;
     }
@@ -722,7 +719,7 @@ class Table {
         if ($instantiate) {
             $this->referenced_tables = array();
             foreach ($this->referenced_table_names as $refCol => $ref_tab) {
-                $this->referenced_tables[$refCol] = $this->get_database()->getTable($ref_tab);
+                $this->referenced_tables[$refCol] = new Table($this->get_database(), $ref_tab);
             }
         }
 
@@ -835,26 +832,26 @@ class Table {
 
     /**
      * Delete a record and its associated change-tracker records.
-     * @param string $pk_value
+     * @param string $pkValue
      * @return int|false Number of rows affected/selected or false on error
      */
-    public function delete_record($pk_value) {
+    public function delete_record($pkValue) {
         // Check permission.
-        if (!Grants::current_user_can(Grants::DELETE, $this->get_name())) {
-            throw new Exception('You do not have permission to delete data from this table.');
+        $user = new User();
+        if (!$user->can(Tables\Permissions::DELETE, $this->get_name())) {
+            throw new Exception('You do not have permission to delete data from the "'.$this->get_name().'" table.');
         }
-        $rec = $this->get_record($pk_value);
-        $wpdb = $this->database->get_wpdb();
-        $wpdb->hide_errors();
-        $del = $wpdb->delete($this->get_name(), array($this->get_pk_column()->get_name() => $pk_value));
-        if (!$del) {
-            throw new \Exception($wpdb->last_error);
-        }
+        $rec = $this->get_record($pkValue);
+        $pkName = $this->get_pk_column()->get_name();
+        $sql = "DELETE FROM `".$this->get_name()."` WHERE `$pkName` = :$pkName";
+        $this->database->query($sql, [$pkName => $pkValue]);
         foreach ($rec->get_changes() as $change) {
-            $where_1 = array('table_name' => $this->get_name(), 'record_ident' => $pk_value);
-            $wpdb->delete(ChangeTracker::changes_name(), $where_1);
-            $where_2 = array('id' => $change->changeset_id);
-            $wpdb->delete(ChangeTracker::changesets_name(), $where_2);
+            $sql2 = "DELETE FROM `changes` WHERE `table_name` = :table_name AND record_ident = :record_ident;";
+            $params2 = array('table_name' => $this->get_name(), 'record_ident' => $pkValue);
+            $this->database->query($sql2, $params2);
+            $sql3 = "DELETE FROM `changesets` WHERE `id` = :id;";
+            $params3 = array('id' => $change->changeset_id);
+            $this->database->query($sql3, $params3);
         }
         $this->record_count = false;
     }
@@ -910,24 +907,14 @@ class Table {
             // Empty strings.
             elseif (!$column->allows_empty_string() && '' === $value && $column->nullable()) {
                 $data[$field] = null;
-                $sql_values[$field] = 'NULL';
-            }
-
-            // Nulls
-            elseif (is_null($value) && $column->nullable()) {
-                unset($data[$field]);
-                $sql_values[$field] = 'NULL';
+                $sql_values[$field] = ":$field";
             }
 
             // POINT columns.
             elseif ($column->get_type() == 'point') {
-                $sql_values[$field] = "GeomFromText('" . esc_sql($value) . "')";
+                $data[$field] = $value;
+                $sql_values[$field] = "GeomFromText(:$field)";
             }
-
-            // Numeric values.
-//            elseif ($column->is_numeric()) {
-//                $sql_values[$field] = $value;
-//            }
 
             // Everything else.
             else {
@@ -961,6 +948,7 @@ class Table {
             }
             //$where_clause = $this->database->prepare("WHERE `$pk_name` = :pk", $pk_value);
             $sql = "UPDATE " . $this->get_name() . " $set_clause WHERE `$pk_name` = :$pk_name;";
+            $data[$pk_name] = $pk_value;
             $this->database->query($sql, $data);
             $new_pk_value = (isset($data[$pk_name]) ) ? $data[$pk_name] : $pk_value;
         } else { // Or insert?
@@ -968,12 +956,8 @@ class Table {
             if (!$user->can(Tables\Permissions::CREATE, $this->get_name())) {
                 throw new \Exception('You do not have permission to insert records into the "' . $this->get_name() . '" table.');
             }
-            $sql = 'INSERT INTO ' . $this->get_name() . ' ' . $set_clause . ';';
-            //App::dump($sql, $data);exit();
+            $sql = 'INSERT INTO ' . $this->get_name() . ' ' . $set_clause;
             $this->database->query($sql, $data);
-//            if (!empty($this->database->->last_error)) {
-//                Exception::wp_die('The record was not created.', 'Unable to create record', $this->database->get_wpdb()->last_error, $sql);
-//            }
             if ($this->get_pk_column()->is_auto_increment()) {
                 $new_pk_value = $this->database->lastInsertId();
             } elseif (isset($data[$pk_name])) {

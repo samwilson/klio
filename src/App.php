@@ -4,13 +4,16 @@ namespace App;
 
 class App {
 
+    /**
+     * Get the application's name.
+     * @return string
+     */
     public static function name() {
         return 'Klio';
     }
 
     /**
      * Get the application's version.
-     *
      * Conforms to Semantic Versioning guidelines.
      * @link http://semver.org
      * @return string
@@ -46,11 +49,19 @@ class App {
      * @param mixed $var
      */
     public static function dump() {
-        if (self::mode()!== 'production') {
+        if (self::mode() !== 'production') {
             foreach (func_get_args() as $var) {
                 \Symfony\Component\VarDumper\VarDumper::dump($var);
             }
         }
+    }
+
+    public static function snakeCase($str) {
+        $res = preg_replace_callback('|[A-Z]{1,}|', function ($m) {
+            return '_' . reset($m);
+        }, $str);
+        $res = trim($res, '_');
+        return mb_strtolower($res);
     }
 
     /**

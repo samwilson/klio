@@ -71,7 +71,7 @@ class TableController extends Base {
      * This action is for importing a single CSV file into a single database table.
      * It guides the user through the four stages of importing:
      * uploading, field matching, previewing, and doing the actual import.
-     * All of the actual work is done in [WebDB_File_CSV].
+     * All of the actual work is done in \App\CSV.
      *
      * 1. In the first stage, a CSV file is **uploaded**, validated, and moved to a temporary directory.
      *    The file is then accessed from this location in the subsequent stages of importing,
@@ -92,8 +92,8 @@ class TableController extends Base {
      *
      * @return void
      */
-    public function import($args) {
-        $template = new \WordPress\Tabulate\Template('import.html');
+    public function import(Request $request, Response $response, array $args) {
+        $template = new \App\Template('import.twig');
         // Set up the progress bar.
         $template->stages = array(
             'choose_file',
@@ -177,7 +177,7 @@ class TableController extends Base {
         return $template->render();
     }
 
-    public function calendar($args) {
+    public function calendar(Request $request, Response $response, array $args) {
         // @todo Validate args.
         $yearNum = (isset($args['year'])) ? $args['year'] : date('Y');
         $monthNum = (isset($args['month'])) ? $args['month'] : date('m');
@@ -222,7 +222,7 @@ class TableController extends Base {
      *
      * @return void
      */
-    public function export($args) {
+    public function export(Request $request, Response $response, array $args) {
         // Get database and table.
         $table = $this->getTable($args['table']);
 

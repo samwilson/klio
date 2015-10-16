@@ -5,7 +5,7 @@ Just a thing.
 
 ## Modules
 
-Module classes are in the same namspace as core classes.
+Module classes are in the same namespace as core classes.
 
 Modules can not define routes.
 
@@ -23,3 +23,6 @@ Modules can add their own template directories with:
 
     $template = new \App\Template('some-template.twig');
     $template->addPath('vendor/org/module/templates_dir');
+
+Tables and records have a few default templates each:
+HTML table and CSV (for tables), and HTML table and editing form (for records).

@@ -203,13 +203,13 @@ class Record {
                 . "   JOIN `users` u ON (u.ID = cs.user) "
                 . " WHERE `table_name` = :table AND record_ident = :id "
                 . " ORDER BY `date_and_time` DESC, cs.id DESC "
-                . " LIMIT 15 ";
+                . " --  LIMIT 15 ";
         $params = array(
             'table' => $this->table->get_name(),
             'id' => $this->get_primary_key(),
         );
         $db = $this->table->get_database();
-        return $db->query($sql, $params);
+        return $db->query($sql, $params)->fetchAll();
     }
 
 }

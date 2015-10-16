@@ -69,8 +69,7 @@ class SchemaTest extends Base {
                 . " (" . \App\DB\Tables\Permissions::READ . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'test_widgets'),"
                 . " (" . \App\DB\Tables\Permissions::READ . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'test_widget_types_1'),"
                 . " (" . \App\DB\Tables\Permissions::READ . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'test_widget_types_2')");
-        //$db = new \App\DB\Database();
-        $tbls = $this->db->getTableNames(true, true);
+        $this->db->getTableNames(true, true);
         $table = $this->db->getTable('test_widgets');
 
         // Check references from Widgets to Types.
@@ -169,8 +168,7 @@ class SchemaTest extends Base {
      * @test
      */
     public function date_and_time() {
-        $db = new Database();
-        $test_table = $db->getTable('test_table', false);
+        $test_table = $this->db->getTable('test_table');
         $rec = $test_table->save_record(array(
             'title' => 'Test',
             'a_date' => '1980-01-01',
@@ -190,7 +188,7 @@ class SchemaTest extends Base {
                 . ' ident VARCHAR(10) PRIMARY KEY,'
                 . ' description TEXT'
                 . ');');
-        $this->db->query("INSERT INTO grants (`permission`, `group`, `table_name`) VALUES "
+        $this->db->query("INSERT INTO `grants` (`permission`, `group`, `table_name`) VALUES "
                 . "(" . \App\DB\Tables\Permissions::READ . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'test_varchar_pk'),"
                 . "(" . \App\DB\Tables\Permissions::CREATE . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'test_varchar_pk')");
         $this->db->getTableNames(true, true);

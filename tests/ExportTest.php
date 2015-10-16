@@ -9,9 +9,6 @@ class ExportTest extends Base {
      * @test
      */
     public function basic_export() {
-        // Let the current user do anything.
-        global $current_user;
-        $current_user->add_cap('promote_users');
 
         // Add some data to the table.
         $test_table = $this->db->getTable('test_types');
@@ -30,15 +27,17 @@ class ExportTest extends Base {
      * @test
      */
     public function point_wkt() {
-        $this->wpdb->query('DROP TABLE IF EXISTS `point_export_test`');
-        $this->wpdb->query('CREATE TABLE `point_export_test` ('
+        $this->db->query('DROP TABLE IF EXISTS `point_export_test`');
+        $this->db->query('CREATE TABLE `point_export_test` ('
                 . ' id INT(10) AUTO_INCREMENT PRIMARY KEY,'
                 . ' title VARCHAR(100) NOT NULL,'
                 . ' geo_loc POINT NOT NULL'
-                . ');'
-        );
-        $db = new WordPress\Tabulate\DB\Database($this->wpdb);
-        $test_table = $db->getTable('point_export_test');
+                . ');');
+        $this->db->query("INSERT INTO grants (`permission`, `group`, `table_name`) VALUES "
+                . "(" . \App\DB\Tables\Permissions::READ . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'point_export_test'),"
+                . "(" . \App\DB\Tables\Permissions::CREATE . ", " . \App\DB\User::PUBLIC_GROUP_ID . ", 'point_export_test');");
+        $this->db->getTableNames(false, true);
+        $test_table = $this->db->getTable('point_export_test');
         $test_table->save_record(array('title' => 'Test', 'geo_loc' => 'POINT(10.1 20.2)'));
         $filename = $test_table->export();
         $this->assertFileExists($filename);

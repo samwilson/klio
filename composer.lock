@@ -4,20 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "aed3759f874a774b4a0a89b7bcc49c96",
+    "hash": "ad40eaec6400b5ff6aad4e4e62e25d95",
+    "content-hash": "f6e4eea3904b3535c53ca14fbfb4474d",
     "packages": [
         {
             "name": "adldap2/adldap2",
-            "version": "v5.1.18",
+            "version": "v5.1.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Adldap2/Adldap2.git",
-                "reference": "7731530a346333ddeb0cfa27484de74bbae7bb2b"
+                "reference": "987bd61a7b5e60518de43fd9c82396725dafb4c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Adldap2/Adldap2/zipball/7731530a346333ddeb0cfa27484de74bbae7bb2b",
-                "reference": "7731530a346333ddeb0cfa27484de74bbae7bb2b",
+                "url": "https://api.github.com/repos/Adldap2/Adldap2/zipball/987bd61a7b5e60518de43fd9c82396725dafb4c0",
+                "reference": "987bd61a7b5e60518de43fd9c82396725dafb4c0",
                 "shasum": ""
             },
             "require": {
@@ -46,15 +47,17 @@
                     "role": "Developer"
                 }
             ],
-            "description": "A PHP LDAP Library for Active Directory Manipulation",
+            "description": "A PHP LDAP Library for Active Directory Manipulation.",
             "keywords": [
                 "active directory",
                 "ad",
+                "adLDAP",
+                "adldap2",
                 "directory",
                 "ldap",
                 "windows"
             ],
-            "time": "2015-10-07 16:41:59"
+            "time": "2015-10-09 20:21:28"
         },
         {
             "name": "codeguy/upload",
@@ -458,16 +461,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.22.2",
+            "version": "v1.22.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "79249fc8c9ff62e41e217e0c630e2e00bcadda6a"
+                "reference": "ebfc36b7e77b0c1175afe30459cf943010245540"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/79249fc8c9ff62e41e217e0c630e2e00bcadda6a",
-                "reference": "79249fc8c9ff62e41e217e0c630e2e00bcadda6a",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/ebfc36b7e77b0c1175afe30459cf943010245540",
+                "reference": "ebfc36b7e77b0c1175afe30459cf943010245540",
                 "shasum": ""
             },
             "require": {
@@ -515,7 +518,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2015-09-22 13:59:32"
+            "time": "2015-10-13 07:07:02"
         },
         {
             "name": "vlucas/phpdotenv",

@@ -34,7 +34,7 @@ class ChangeTracker {
         if (!is_null($keep_open)) {
             self::$keep_changeset_open = $keep_open;
         }
-        if (!self::$current_changeset_id) {
+        if (self::$current_changeset_id === false) {
             $user = new User();
             $data = array(
                 'user' => $user->getId(),
@@ -52,6 +52,7 @@ class ChangeTracker {
      */
     public function close_changeset() {
         self::$current_changeset_id = false;
+        self::$keep_changeset_open = false;
         $this->current_changeset_comment = null;
     }
 
@@ -69,6 +70,9 @@ class ChangeTracker {
     }
 
     public function after_save(Table $table, Record $new_record) {
+        if (self::$current_changeset_id === false) {
+            throw new \Exception("No changeset is open (after save for ".$table->get_name());
+        }
         // Don't save changes to the changes tables.
         if (in_array($table->get_name(), self::table_names())) {
             return false;
@@ -91,14 +95,14 @@ class ChangeTracker {
                 'old_value' => $old_val,
                 'new_value' => $new_val,
             );
-            $sql = "INSERT INTO changes SET"
-                    . " changeset = :changeset,"
-                    . " change_type = 'field',"
-                    . " table_name = :table_name,"
-                    . " column_name = :column_name,"
-                    . " record_ident = :record_ident,"
-                    . " old_value = :old_value,"
-                    . " new_value = :new_value"
+            $sql = "INSERT INTO changes SET "
+                    . " `changeset`    = :changeset,"
+                    . " `change_type`  = 'field',"
+                    . " `table_name`   = :table_name,"
+                    . " `column_name`  = :column_name,"
+                    . " `record_ident` = :record_ident,"
+                    . " `old_value`    = :old_value,"
+                    . " `new_value`    = :new_value"
                     . ";";
             $this->db->query($sql, $data);
         }

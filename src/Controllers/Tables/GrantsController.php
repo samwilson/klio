@@ -15,7 +15,7 @@ class GrantsController extends \App\Controllers\TableController {
         }
         $db = new Database();
         $template = new \App\Template('grants.twig');
-        $template->addPath('modules/grants/templates');
+        //$template->addPath('modules/grants/templates');
         $template->title = 'Grants';
         $template->user = $this->user;
         $template->tables = $db->getTableNames();
@@ -24,7 +24,7 @@ class GrantsController extends \App\Controllers\TableController {
         $grants = new \App\DB\Grants();
         $template->grants = $db->getTable('grants', false)->get_records(false);
         //$template->grants = $grants->get();
-        $template->capabilities = $grants->get_capabilities();
+        $template->capabilities = 
         $response->setContent($template->render());
         return $response;
     }

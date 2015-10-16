@@ -111,7 +111,7 @@ class ChangeTrackerTest extends Base {
         $this->assertEquals(2, $test_types->count_records());
         $test_types->delete_record(2);
         $this->assertEquals(1, $test_types->count_records());
-        $changesets = $this->db->getTable(ChangeTracker::changesets_name());
+        $changesets = $this->db->getTable('changesets');
         $this->assertEquals(1, $changesets->count_records());
     }
 

@@ -23,8 +23,14 @@ class RecordController extends Base {
         $db = new Database();
         $table = $db->getTable($args['table']);
         $template = new \App\Template('record/view.twig');
+        $template->user = $this->user;
+        $template->active_tab = 'view';
+        if (!$table) {
+            throw new \League\Route\Http\Exception\NotFoundException("Table '{$args['table']}' not found.");
+        }
         $template->title = $table->get_title();
         $template->table = $table;
+        $template->tables = $db->getTableNames();
         $template->record = $table->get_record($args['id']);
         $response->setContent($template->render());
         return $response;
@@ -35,23 +41,21 @@ class RecordController extends Base {
         $db = new Database();
         $table = $db->getTable($args['table']);
         $template = new \App\Template('record/edit.twig');
+        $template->user = $this->user;
+        $template->active_tab = 'create';
         $template->table = $table;
         if (!$table) {
-            $template->message(\App\Template::ERROR, "Table {$args['table']} not found.");
-            $response->setContent($template->render());
-            return $response;
+            throw new \League\Route\Http\Exception\NotFoundException("Table '{$args['table']}' not found.");
         }
 
         // Give it all to the template.
-        $template->user = $this->user;
-        $template->active_tab = 'create';
         $template->title = $table->get_title();
         $template->tables = $db->getTableNames();
         if (isset($args['id'])) {
             $template->record = $table->get_record($args['id']);
             // Check permission.
             if (!$this->user->can(Permissions::UPDATE, $table->get_name())) {
-                $template->message(\App\Template::ERROR, 'You do not have permission to update data in this table.');
+                $template->message(\App\Template::ERROR, 'You do not have permission to update data in the '.$table->get_name().' table.');
             }
             $template->active_tab = 'edit';
         }
@@ -59,7 +63,7 @@ class RecordController extends Base {
             $template->record = $table->get_default_record();
             // Check permission.
             if (!$this->user->can(Permissions::READ, $table->get_name())) {
-                $template->message(\App\Template::WARNING, 'You do not have permission to read records in this table.');
+                $template->message(\App\Template::WARNING, 'You do not have permission to read records in the '.$table->get_name().' table.');
             }
             // Add query-string values.
             if (isset($args['defaults'])) {

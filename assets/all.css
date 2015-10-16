@@ -4,9 +4,11 @@ html{color:#000;background:#FFF}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre
 body { font-family:"Segoe UI", Candara, "Bitstream Vera Sans", "DejaVu Sans", "Bitstream Vera Sans",  "Trebuchet MS", Verdana, "Verdana Ref", sans-serif }
 
 h1 {  font-size:1.7em; padding:0.2em }
+h2 {  font-size:1.3em; padding:0.2em }
 
 a { text-decoration:none; color:#175491 }
 a:hover { text-decoration:underline }
+em { font-style:italic }
 
 main { }
 
@@ -35,10 +37,10 @@ div.page { padding:1em 0.4em }
 #login-form p.submit { margin-left:11em }
 
 /** Alerts. */
-.alerts .alert { border:1px solid #ccc; margin:0.3em 0; padding:0.35em }
-.alerts .alert-success { border-color:green; color:green }
-.alerts .alert-warning { border-color:orange; color:orange }
-.alerts .alert-error { border-color:red; color:red }
+.alert { border:1px solid #ccc; margin:0.3em 0; padding:0.35em }
+.alert-success { border-color:green; color:green }
+.alert-warning { border-color:orange; color:orange }
+.alert-error { border-color:red; color:red }
 
 /** Filters. */
 .filters table { border:0 }
@@ -47,7 +49,7 @@ div.page { padding:1em 0.4em }
 /** Tables. */
 table { border:1px solid #b1b5ba; border-collapse:collapse; font-size:96% }
 td, th { padding:0.1em 0.2em; text-align:left }
-th { background-color:#dfe3e8; border:1px solid #b1b5ba; vertical-align:bottom }
+th { background-color:#dfe3e8; border:1px solid #b1b5ba; vertical-align:bottom; font-weight:bolder }
 th.selected { background-color:#aaa }
 td { border:1px solid #dadcdd; vertical-align:top }
 
@@ -58,6 +60,7 @@ td { border:1px solid #dadcdd; vertical-align:top }
 .tabs li { float:left; border:1px solid #bbb; border-bottom-width: 0; margin:0 0.4em }
 .tabs a { text-decoration: none; display:block; background:#eee; padding:0; color:#00c; width:8em; text-align:center }
 .tabs a:hover { background:#ddf }
+.tabs a.inactive { cursor:not-allowed; color:#6f7189 }
 .tabs li.active { border-color:#6f7189 }
 .tabs li.active a { position:relative; top:1px; background:white; color:black }
 
@@ -74,3 +77,6 @@ footer { clear:both; text-align:right; font-size:smaller; background-color:#efef
 #grants-form tr.select-all td { border-width:0 0 1px 0 }
 #grants-form td.select-all { border-width:0 1px }
 #grants-form tr.select-all td.label { border-width:0 0 0 1px; vertical-align:middle; text-align:center; font-size:larger }
+
+
+.related-records { font-size:smaller; background-color:#dfe3e8; margin:0.6em 0; border:1px solid #b1b5ba }

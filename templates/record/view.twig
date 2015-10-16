@@ -2,26 +2,104 @@
 
 {% block content %}
 
-    <table>
-        {% for column in table.get_columns %}
-            <tr>
-                <th>{{column.get_title}}</th>
-                <td>{% include 'field/view.twig' %}</td>
-                <td>
-                    <em>{{column.get_comment}}</em>
+<table>
+{% for column in table.get_columns %}
 
-                    {% if column.is_auto_increment %}A value for this field will be assigned automatically.{% endif %}
+    <tr>
+        <th>{{column.get_title}}</th>
+        <td>{% include 'field/view.twig' with {links:true} %}</td>
+        <td>
+            <em>{{column.get_comment}}</em>
+            {% if column.is_auto_increment %}A value for this field is assigned automatically.{% endif %}
+            {% if column.is_foreign_key %}
+                This field is a cross reference to <a href="{{baseurl}}/table/{{column.get_referenced_table.get_name}}">{{column.get_referenced_table.get_title}}</a>.
+            {% endif %}
+            {% if column.get_type == 'year' %}
+                Only the years 1901&ndash;2155 can be entered here.
+            {% endif %}
+        </td>
+    </tr>
 
-                    {% if column.is_foreign_key %}
-                        This field is a cross reference to {{column.get_referenced_table.get_title}}.
-                    {% endif %}
+{% endfor %}
+</table>
 
-                    {% if column.get_type == 'year' %}
-                        Only the years 1901&ndash;2155 can be entered here.
-                    {% endif %}
-                </td>
-            </tr>
+{% if record.get_primary_key %}
+<div class="referencing-tables">
 
-        {% endfor %}
-    </table>
+    {% for refinfo in table.get_referencing_tables %}
+    <div class="related-records referencing-table">
+        <span class="handlediv" title="Click to toggle"></span>
+        <h2 id="related-{{refinfo.table.get_name()}}">
+            <span>
+                Related records: {{refinfo.table.get_title}}
+                (as <em>{{refinfo.column|titlecase}}</em>)
+                <a href="{{baseurl}}/table/{{refinfo.table.get_name}}?filter[0][column]={{refinfo.column}}&filter[0][operator]==&filter[0][value]={{record.get_title}}"
+                   class="button button-small">
+                    View all
+                </a>
+                <a href="{{refinfo.table.get_url('export', {'filter[0][column]':refinfo.column,'filter[0][operator]':'=','filter[0][value]':record.get_title()})}}"
+                   class="button button-small" title="Export related records to Comma Separated Values format">
+                    CSV of all
+                </a>
+                {% set defaults_key = 'defaults['~refinfo.column~']' %}
+                <a href="{{refinfo.table.get_url('index', {(defaults_key):record.get_primary_key(), ident:'', return_to:record.get_url()~'#related-'~refinfo.table.get_name()}, 'record')}}"
+                   class="button button-small">
+                    Add record
+                </a>
+            </span>
+        </h2>
+        <div class="inside">
+            {% set related_records = record.get_referencing_records(refinfo.table,refinfo.column) %}
+            {% include 'data_table.twig' with {links:true, sortable:false, table:refinfo.table, records:related_records} %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if table.has_changes_recorded %}
+    <div class="related-records">
+        <h2>History</h2>
+        <div class="inside">
+            {% set changes = record.get_changes %}
+            {% if not changes %}
+            <p class="alert alert-success">No history has yet been recorded for this record.</p>
+            {% else %}
+            <p>Recent changes made to this record.</p>
+            <table class="tabulate-change-tracker">
+                <thead>
+                    <tr>
+                        <th>Date and Time</th>
+                        <th>Field</th>
+                        <th>Old Value</th>
+                        <th></th>
+                        <th>New Value</th>
+                        <th>User</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for change in changes %}
+                        <tr>
+                            <td>
+                                <a href="{{baseurl}}/record/changesets/{{change.changeset_id}}">
+                                    {{change.date_and_time}}
+                                </a>
+                            </td>
+                            <td>{{change.column_name|titlecase}}</td>
+                            <td class="value">{{change.old_value}}</td>
+                            <td>&rArr;</td>
+                            <td class="value">{{change.new_value}}</td>
+                            <td>{{change.username}}</td>
+                            <td><em>{{change.comment}}</em></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}{# end if changes or not #}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+
 {% endblock %}

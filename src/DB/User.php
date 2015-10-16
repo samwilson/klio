@@ -109,7 +109,7 @@ class User {
                 self::$grants[$g->table_name][$g->permission] = true;
             }
         }
-        return isset(self::$grants[$tableName][$permission]);
+        return isset(self::$grants['*'][$permission]) || isset(self::$grants[$tableName][$permission]);
     }
 
 }

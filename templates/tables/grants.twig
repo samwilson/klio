@@ -1,17 +1,17 @@
 {% extends "base.twig" %}
 {% block content %}
 
-    <p>Here you can grant access to the database to members of any Groups.</p>
-{{dump(grants)}}
+<p>Here you can grant access to the database to members of any Groups.</p>
+
     <form action="{{baseurl}}/table/grants/save" method="post" id="grants-form">
         <table>
             <thead>
                 <tr>
                     <th>Table Name</th>
                     <th></th>
-                        {% for group in groups %}
-                        <th>{{group.title}}</th>
-                        {% endfor %}
+                    {% for group in groups %}
+                    <th>{{group.title}}</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>

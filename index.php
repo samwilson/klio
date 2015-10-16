@@ -65,7 +65,6 @@ try {
     $template = new \App\Template('error.twig');
     $template->title = 'Error';
     $template->message('error', $e->getMessage());
-
     $template->e = $e;
     $response = new \Symfony\Component\HttpFoundation\Response($template->render());
 }

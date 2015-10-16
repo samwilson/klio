@@ -66,7 +66,6 @@ class Database {
                 } else {
                     $type = \PDO::PARAM_STR;
                 }
-                //echo '<li>';var_dump($value, $type);
                 $stmt->bindValue($placeholder, $value, $type);
             }
             if ($class) {
@@ -198,11 +197,8 @@ class Database {
                 . " UNIQUE KEY (`group`,`permission`,`table_name`) "
                 . ")");
         $this->query("INSERT IGNORE INTO `grants` (`group`, `permission`, `table_name`) VALUES"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','grants'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::UPDATE . "','grants'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::CREATE . "','grants'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','permissions'),"
-                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','groups')");
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::READ . "','*'),"
+                . " (" . User::ADMIN_GROUP_ID . ",'" . Permissions::CREATE . "','grants')");
         $this->query("CREATE TABLE IF NOT EXISTS `changesets` ("
                 . " `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                 . " `date_and_time` DATETIME NOT NULL,"
