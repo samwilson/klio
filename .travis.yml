@@ -19,7 +19,7 @@ before_script:
 install:
   - composer install
   - echo -e "DB_USER=root\nDB_PASS=" > $TRAVIS_BUILD_DIR/.env
+  - cat $TRAVIS_BUILD_DIR/.env
 
 script:
   - phpunit
-  - phpcs --report=full --standard=PSR2 src
