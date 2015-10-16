@@ -1,0 +1,25 @@
+language: php
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+
+addons:
+  apt:
+    packages:
+      - php5-ldap
+
+before_install:
+  - echo "extension = ldap.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+before_script:
+  - mysql -e 'create database klio;'
+
+install:
+  - composer install
+  - echo -e "DB_USER=root\nDB_PASS=" > $TRAVIS_BUILD_DIR/.env
+
+script:
+  - phpunit
+  - phpcs --report=full --standard=PSR2 src
