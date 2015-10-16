@@ -35,7 +35,7 @@ class TableController extends Base {
         }
 
         // Filters.
-        $filter_param = (isset($args['filter'])) ? $args['filter'] : array();
+        $filter_param = (isset($_GET['filter'])) ? $_GET['filter'] : array();
         $table->add_filters($filter_param);
         $filters = $table->get_filters();
         $title_col = $table->get_title_column();

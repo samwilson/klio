@@ -180,7 +180,7 @@ class Table {
 
             // LIKE or NOT LIKE
             if ($filter['operator'] == 'like' || $filter['operator'] == 'not like') {
-                $where_clause .= " AND CONVERT($f_column, CHAR) " . strtoupper($filter['operator']) . " %s ";
+                $where_clause .= " AND CONVERT($f_column, CHAR) " . strtoupper($filter['operator']) . " :$param_name ";
                 $params[$param_name] = '%' . trim($filter['value']) . '%';
             } // Equals or does-not-equal
             elseif ($filter['operator'] == '=' || $filter['operator'] == '!=') {

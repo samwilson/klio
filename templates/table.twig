@@ -3,10 +3,6 @@
 {% block content %}
 
     <form action="{{baseurl}}/table/{{table.get_name}}" method="get" class="filters">
-        <input type="hidden" name="page" value="tabulate" />
-        <input type="hidden" name="controller" value="table" />
-        <input type="hidden" name="action" value="index" />
-        <input type="hidden" name="table" value="{{table.get_name}}" />
         <table>
 
             {% for fid,filter in filters %}

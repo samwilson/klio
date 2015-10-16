@@ -2,6 +2,7 @@
 
 namespace App\DB;
 
+use App\App;
 use App\DB\Tables\Permissions;
 
 class Database {
@@ -19,10 +20,11 @@ class Database {
         if (self::$pdo) {
             return;
         }
-        $host = getenv('DB_HOST') ? getenv('DB_HOST') : 'localhost';
-        $dsn = "mysql:host=$host;dbname=" . getenv('DB_NAME');
+        $host = App::env('DB_HOST', 'localhost');
+        $dbname = App::env('DB_NAME', 'klio');
+        $dsn = "mysql:host=$host;dbname=$dbname";
         $attr = array(\PDO::ATTR_TIMEOUT => 10);
-        self::$pdo = new \PDO($dsn, getenv('DB_USER'), getenv('DB_PASS'), $attr);
+        self::$pdo = new \PDO($dsn, App::env('DB_USER', 'root'), App::env('DB_PASS'), $attr);
         self::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->setFetchMode(\PDO::FETCH_OBJ);
     }
