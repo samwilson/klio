@@ -5,14 +5,14 @@ require __DIR__ . '/vendor/autoload.php';
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-session_start();
-
 /**
  * Environment.
  */
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASS']);
+session_start();
+session_regenerate_id(true);
 
 /**
  * Routes.

@@ -30,24 +30,24 @@
     <div class="related-records referencing-table">
         <span class="handlediv" title="Click to toggle"></span>
         <h2 id="related-{{refinfo.table.get_name()}}">
-            <span>
-                Related records: {{refinfo.table.get_title}}
-                (as <em>{{refinfo.column|titlecase}}</em>)
-                <a href="{{baseurl}}/table/{{refinfo.table.get_name}}?filter[0][column]={{refinfo.column}}&filter[0][operator]==&filter[0][value]={{record.get_title}}"
-                   class="button button-small">
-                    View all
-                </a>
-                <a href="{{refinfo.table.get_url('export', {'filter[0][column]':refinfo.column,'filter[0][operator]':'=','filter[0][value]':record.get_title()})}}"
-                   class="button button-small" title="Export related records to Comma Separated Values format">
-                    CSV of all
-                </a>
-                {% set defaults_key = 'defaults['~refinfo.column~']' %}
-                <a href="{{refinfo.table.get_url('index', {(defaults_key):record.get_primary_key(), ident:'', return_to:record.get_url()~'#related-'~refinfo.table.get_name()}, 'record')}}"
-                   class="button button-small">
-                    Add record
-                </a>
-            </span>
+            <strong>{{refinfo.table.get_title}}</strong>
+            (as <em>{{refinfo.column|titlecase}}</em>)
         </h2>
+        <p class="actions">
+            <a href="{{baseurl}}/table/{{refinfo.table.get_name}}?filter[0][column]={{refinfo.column}}&filter[0][operator]==&filter[0][value]={{record.get_title}}"
+               class="button button-small">
+                [View all]
+            </a>
+            <a href="{{refinfo.table.get_url('export', {'filter[0][column]':refinfo.column,'filter[0][operator]':'=','filter[0][value]':record.get_title()})}}"
+               class="button button-small" title="Export related records to Comma Separated Values format">
+                [CSV of all]
+            </a>
+            {% set defaults_key = 'defaults['~refinfo.column~']' %}
+            <a href="{{refinfo.table.get_url('index', {(defaults_key):record.get_primary_key(), ident:'', return_to:record.get_url()~'#related-'~refinfo.table.get_name()}, 'record')}}"
+               class="button button-small">
+                [Add record]
+            </a>
+        </p>
         <div class="inside">
             {% set related_records = record.get_referencing_records(refinfo.table,refinfo.column) %}
             {% include 'data_table.twig' with {links:true, sortable:false, table:refinfo.table, records:related_records} %}

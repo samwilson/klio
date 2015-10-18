@@ -6,8 +6,8 @@
     </testsuites>
     <php>
         <env name="MODE" value="testing" />
-        <env name="DB_NAME" value="klio_test" />
-        <env name="DB_USER" value="root" />
-        <env name="DB_PASS" value="Pa55w0rD" />
+        <env name="DB_NAME" value="test_db_name" />
+        <env name="DB_USER" value="test_db_user" />
+        <env name="DB_PASS" value="test_db_pass" />
     </php>
 </phpunit>

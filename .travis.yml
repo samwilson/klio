@@ -13,13 +13,15 @@ addons:
 before_install:
   - echo "extension = ldap.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
-before_script:
-  - mysql -e 'create database klio;'
-
 install:
   - composer install
-  - echo -e "DB_USER=root\nDB_PASS=" > $TRAVIS_BUILD_DIR/.env
-  - cat $TRAVIS_BUILD_DIR/.env
+  - cp $TRAVIS_BUILD_DIR/phpunit.example.xml $TRAVIS_BUILD_DIR/phpunit.xml
+  - sed -i "s/test_db_name/klio/" $TRAVIS_BUILD_DIR/phpunit.xml
+  - sed -i "s/test_db_user/root/" $TRAVIS_BUILD_DIR/phpunit.xml
+  - sed -i "s/test_db_pass//" $TRAVIS_BUILD_DIR/phpunit.xml
+
+before_script:
+  - mysql -e 'create database klio;'
 
 script:
   - phpunit
